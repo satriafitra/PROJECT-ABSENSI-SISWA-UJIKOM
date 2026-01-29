@@ -17,7 +17,10 @@ return new class extends Migration
             $table->string('nama');
             $table->string('nip')->nullable()->unique();
             $table->string('email')->nullable()->unique();
+            // 🔐 PASSWORD (WAJIB UNTUK LOGIN)
+            $table->string('password');
             $table->enum('jenis_kelamin', ['L', 'P'])->nullable();
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
 
             $table->timestamps();
         });

@@ -10,7 +10,7 @@
     <!-- SweetAlert Success Notification -->
     @if(session('success'))
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
@@ -25,7 +25,7 @@
         <p class="text-gray-600 text-lg">Daftar guru yang terdaftar</p>
 
         <a href="{{ route('admin.guru.create') }}"
-           class="bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-orange-700 transition duration-300">
+            class="bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-orange-700 transition duration-300">
             + Tambah Guru
         </a>
     </div>
@@ -39,6 +39,7 @@
                     <th class="p-3 font-medium">Email</th>
                     <th class="p-3 font-medium">NIP</th>
                     <th class="p-3 font-medium">Status</th>
+                    <th class="p-3 font-medium">Password</th>
                     <th class="p-3 font-medium">Aksi</th>
                 </tr>
             </thead>
@@ -55,16 +56,28 @@
                             {{ ucfirst($guru->status) }}
                         </span>
                     </td>
+                    <td class="p-3">
+                        @if($guru->password)
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            Sudah diset
+                        </span>
+                        @else
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                            Belum diset
+                        </span>
+                        @endif
+                    </td>
+
                     <td class="p-3 flex gap-3">
                         <a href="{{ route('admin.guru.edit', $guru->id) }}"
-                           class="text-blue-600 hover:underline font-medium">
+                            class="text-blue-600 hover:underline font-medium">
                             Edit
                         </a>
 
                         <form action="{{ route('admin.guru.destroy', $guru->id) }}"
-                              method="POST"
-                              class="inline"
-                              onsubmit="return confirmDelete(event)">
+                            method="POST"
+                            class="inline"
+                            onsubmit="return confirmDelete(event)">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-500 hover:underline font-medium">

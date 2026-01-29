@@ -108,11 +108,12 @@
         </li>
 
         <li>
-            <a href="#"
+            <a href="{{ route('guru.scan.qr') }}"
                 class="sidebar-item">
                 Scan QR
             </a>
         </li>
+
 
         <li>
             <a href="#"

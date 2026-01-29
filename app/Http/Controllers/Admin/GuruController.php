@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Guru;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 
 class GuruController extends Controller
 {
@@ -22,26 +24,37 @@ class GuruController extends Controller
         return view('admin.guru.create');
     }
 
+    // ================= STORE =================
     public function store(Request $request)
     {
         $request->validate([
-            'nama'   => 'required|string|max:255',
-            'nip'    => 'nullable|unique:guru,nip',
-            'email'  => 'nullable|email|unique:guru,email',
-            'status' => 'required|in:aktif,nonaktif',
+            'nama'     => 'required',
+            'email'    => 'required|email|unique:guru,email|unique:users,email',
+            'password' => 'required|min:6',
+            'status'   => 'required'
         ]);
 
-        Guru::create([
+        // simpan ke tabel guru
+        $guru = Guru::create([
             'nama'   => $request->nama,
-            'nip'    => $request->nip,
             'email'  => $request->email,
+            'nip'    => $request->nip,
             'status' => $request->status,
+            'password' => Hash::make($request->password),
         ]);
 
-        return redirect()
-            ->route('admin.guru.index')
-            ->with('success', 'Data guru berhasil ditambahkan');
+        // BUAT AKUN LOGIN (INI KUNCINYA)
+        User::create([
+            'name'     => $request->nama,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => 'guru',
+        ]);
+
+        return redirect()->route('admin.guru.index')
+            ->with('success', 'Guru & akun login berhasil dibuat');
     }
+
 
     // ================= EDIT =================
     public function edit($id)
@@ -50,34 +63,39 @@ class GuruController extends Controller
         return view('admin.guru.edit', compact('guru'));
     }
 
+    // ================= UPDATE =================
     public function update(Request $request, $id)
     {
+        $guru = Guru::findOrFail($id);
+
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'nip' => [
-                'nullable',
-                Rule::unique('guru', 'nip')->ignore($id),
-            ],
-            'email' => [
-                'nullable',
-                'email',
-                Rule::unique('guru', 'email')->ignore($id),
-            ],
-            'status' => 'required|in:aktif,nonaktif',
+            'nama'  => 'required',
+            'email' => 'required|email|unique:guru,email,' . $guru->id,
+            'status' => 'required',
         ]);
 
-        $guru = Guru::findOrFail($id);
-        $guru->update($request->only([
-            'nama',
-            'nip',
-            'email',
-            'status'
-        ]));
+        $guru->update($request->only('nama', 'email', 'nip', 'status'));
 
-        return redirect()
-            ->route('admin.guru.index')
-            ->with('success', 'Data guru berhasil diperbarui');
+        // UPDATE USER LOGIN
+        $user = User::where('email', $guru->email)->first();
+
+        if ($user) {
+            $user->update([
+                'name' => $request->nama,
+                'email' => $request->email,
+            ]);
+
+            if ($request->filled('password')) {
+                $user->update([
+                    'password' => Hash::make($request->password)
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.guru.index')
+            ->with('success', 'Data guru diperbarui');
     }
+
 
     // ================= DELETE =================
     public function destroy($id)

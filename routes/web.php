@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GuruController;
+use App\Http\Controllers\Guru\ScanQrController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | DASHBOARD REDIRECT BY ROLE
+    | DASHBOARD REDIRECT (AUTO SESUAI ROLE)
     |--------------------------------------------------------------------------
     */
     Route::get('/dashboard', function () {
@@ -45,10 +47,10 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN ROUTES
+    | ADMIN ROUTES (KHUSUS ADMIN)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('can:isAdmin')->prefix('admin')->name('admin.')->group(function () {
 
         /* ================= DASHBOARD ================= */
         Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -61,9 +63,6 @@ Route::middleware(['auth'])->group(function () {
         Route::view('/rekap-absensi', 'admin.rekapabsensi')->name('rekapabsensi');
 
         /* ================= GURU ================= */
-
-        // 👉 ALIAS AGAR route('admin.guru') TIDAK ERROR
-
         Route::prefix('guru')->name('guru.')->group(function () {
 
             Route::get('/', [GuruController::class, 'index'])->name('index');
@@ -78,13 +77,22 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | GURU ROUTES
+    | GURU ROUTES (KHUSUS GURU)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('guru')->name('guru.')->group(function () {
+    Route::middleware('can:isGuru')->prefix('guru')->name('guru.')->group(function () {
+
         Route::get('/dashboard', function () {
             return view('guru.dashboard');
         })->name('dashboard');
+
+        // SCAN QR
+        Route::get('/scan-qr', [ScanQrController::class, 'index'])
+            ->name('scan.qr');
+
+        // 👉 EXPORT HASIL SCAN
+        Route::get('/scan-qr/export', [ScanQrController::class, 'export'])
+            ->name('scan.export');
     });
 
     /*

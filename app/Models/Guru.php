@@ -15,7 +15,13 @@ class Guru extends Model
         'nama',
         'nip',
         'email',
+        'password',       // ⬅️ WAJIB
         'status',
         'jenis_kelamin',
+    ];
+
+    // otomatis hash password kalau di-set
+    protected $hidden = [
+        'password',
     ];
 }

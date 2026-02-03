@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Absensi Siswa SD')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body class="bg-gray-100">

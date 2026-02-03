@@ -16,29 +16,27 @@ class SiswaController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
+        $major  = $request->query('major');
 
         $students = Student::with('class')
             ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('nis', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('nis', 'like', "%{$search}%");
+                });
+            })
+            ->when($major, function ($query, $major) {
+                $query->whereHas('class', function ($q) use ($major) {
+                    $q->where('name', 'LIKE', "%{$major}%");
+                });
             })
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
-        if ($request->query('json') == 1) {
-            return response()->json([
-                'status' => 'success',
-                'current_page' => $students->currentPage(),
-                'per_page' => $students->perPage(),
-                'total' => $students->total(),
-                'last_page' => $students->lastPage(),
-                'data' => $students->items(),
-            ]);
-        }
-
-        return view('admin.siswa.index', compact('students', 'search'));
+        return view('admin.siswa.index', compact('students', 'search', 'major'));
     }
+
 
     // ===============================
     // CREATE
@@ -55,17 +53,15 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // boleh kirim nis ATAU nisn
-            'nis'     => 'nullable|string|max:20|unique:students,nis',
-            'nisn'    => 'nullable|string|max:20|unique:students,nis',
-            'name'    => 'required|string|max:255',
-            'class_id'=> 'nullable|exists:classes,id',
+            'nis'      => 'nullable|string|max:20|unique:students,nis',
+            'nisn'     => 'nullable|string|max:20|unique:students,nis',
+            'name'     => 'required|string|max:255',
+            'class_id' => 'nullable|exists:classes,id',
         ]);
 
         Student::create([
-            // PRIORITAS: nisn → nis → null
-            'nis' => $request->nisn ?? $request->nis,
-            'name' => $request->name,
+            'nis'      => $request->nisn ?? $request->nis,
+            'name'     => $request->name,
             'class_id' => $request->class_id,
             'qr_token' => Str::uuid(),
         ]);
@@ -93,15 +89,15 @@ class SiswaController extends Controller
         $student = Student::findOrFail($id);
 
         $request->validate([
-            'nis'     => 'nullable|string|max:20|unique:students,nis,' . $student->id,
-            'nisn'    => 'nullable|string|max:20|unique:students,nis,' . $student->id,
-            'name'    => 'required|string|max:255',
-            'class_id'=> 'nullable|exists:classes,id',
+            'nis'      => 'nullable|string|max:20|unique:students,nis,' . $student->id,
+            'nisn'     => 'nullable|string|max:20|unique:students,nis,' . $student->id,
+            'name'     => 'required|string|max:255',
+            'class_id' => 'nullable|exists:classes,id',
         ]);
 
         $student->update([
-            'nis' => $request->nisn ?? $request->nis,
-            'name' => $request->name,
+            'nis'      => $request->nisn ?? $request->nis,
+            'name'     => $request->name,
             'class_id' => $request->class_id,
         ]);
 
@@ -114,8 +110,7 @@ class SiswaController extends Controller
     // ===============================
     public function destroy($id)
     {
-        $student = Student::findOrFail($id);
-        $student->delete();
+        Student::findOrFail($id)->delete();
 
         return redirect()->route('admin.siswa.index')
             ->with('success', 'Siswa berhasil dihapus!');

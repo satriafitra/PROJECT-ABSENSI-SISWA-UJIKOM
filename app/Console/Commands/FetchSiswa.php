@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class FetchSiswa extends Command
 {
     protected $signature = 'siswa:fetch';
-    protected $description = 'Ambil data siswa dari API Zieapi dan simpan ke table students';
+    protected $description = 'Sinkron data siswa dari API Zieapi';
 
     public function handle()
     {
@@ -28,7 +28,7 @@ class FetchSiswa extends Command
 
         $siswaArray = $response->json('data') ?? [];
         if (empty($siswaArray)) {
-            $this->warn("Data kosong");
+            $this->warn("Data siswa kosong");
             return 0;
         }
 
@@ -40,22 +40,38 @@ class FetchSiswa extends Command
             $nisn = $item['nisn'] ?? null;
             if (!$nisn) continue;
 
-            // 🔥 SKIP DUPLIKAT API
+            // skip duplikat dari API
             if (in_array($nisn, $processedNisn)) continue;
             $processedNisn[] = $nisn;
 
-            // Cari class_id
+            /* ======================
+               KELAS (nama_rombel)
+            ====================== */
             $classId = null;
-            if (!empty($item['kelas'])) {
-                $class = DB::table('classes')->where('name', $item['kelas'])->first();
-                $classId = $class?->id;
+            $kelasName = $item['nama_rombel'] ?? null;
+
+            if ($kelasName) {
+                $kelasName = trim($kelasName);
+
+                $class = DB::table('classes')->where('name', $kelasName)->first();
+
+                if (!$class) {
+                    $classId = DB::table('classes')->insertGetId([
+                        'name' => $kelasName,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } else {
+                    $classId = $class->id;
+                }
             }
 
-            // 🔍 cek apakah siswa sudah ada
+            /* ======================
+               STUDENT
+            ====================== */
             $exists = DB::table('students')->where('nis', $nisn)->exists();
 
             if ($exists) {
-                // 🔁 UPDATE SAJA (qr_token TIDAK DIUBAH)
                 DB::table('students')
                     ->where('nis', $nisn)
                     ->update([
@@ -64,7 +80,6 @@ class FetchSiswa extends Command
                         'updated_at' => now(),
                     ]);
             } else {
-                // ➕ INSERT BARU (qr_token BARU)
                 DB::table('students')->insert([
                     'nis' => $nisn,
                     'name' => $item['nama'] ?? '',

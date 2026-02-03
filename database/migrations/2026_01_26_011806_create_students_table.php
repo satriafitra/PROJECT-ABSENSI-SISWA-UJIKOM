@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->string('nis')->unique();
+            $table->string('nis')->unique()->nullable();
             $table->string('name');
-            $table->foreignId('class_id')->constrained('classes')->cascadeOnDelete();
+            $table->foreignId('class_id')->nullable()->constrained('classes')->nullOnDelete();
             $table->string('qr_token')->unique();
             $table->timestamps();
         });
@@ -30,3 +30,4 @@ return new class extends Migration
         Schema::dropIfExists('students');
     }
 };
+ 

@@ -24,7 +24,7 @@
 
             <!-- Title -->
             <span class="text-lg font-semibold tracking-wide">
-                Absensi SMP
+                Absensi Siswa
             </span>
         </div>
 

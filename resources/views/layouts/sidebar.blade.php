@@ -77,8 +77,8 @@
 
 
         <li>
-            <a href="{{ route('admin.siswa') }}"
-                class="sidebar-item {{ request()->routeIs('admin.siswa') ? 'active' : '' }}">
+            <a href="{{ route('admin.siswa.index') }}"
+                class="sidebar-item {{ request()->routeIs('admin.siswa.*') ? 'active' : '' }}">
                 Siswa
             </a>
         </li>

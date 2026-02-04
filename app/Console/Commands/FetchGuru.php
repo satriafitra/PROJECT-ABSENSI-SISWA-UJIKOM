@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\User;
+
 
 class FetchGuru extends Command
 {
@@ -40,36 +42,50 @@ class FetchGuru extends Command
             $nip   = $item['nip'] ?? null;
             $email = $item['email'] ?? null;
 
-            if (!$nip && !$email) continue;
+            if (!$email) continue; // LOGIN BUTUH EMAIL
 
-            // cari guru existing (prioritas nip)
-            $guru = DB::table('guru')
-                ->when($nip, fn ($q) => $q->where('nip', $nip))
-                ->when(!$nip && $email, fn ($q) => $q->where('email', $email))
-                ->first();
+            // =========================
+            // GURU
+            // =========================
+            $guru = DB::table('guru')->where('email', $email)->first();
 
-            $data = [
-                'nama'           => $item['nama'] ?? '',
-                'nip'            => $nip,
-                'email'          => $email,
-                'jenis_kelamin'  => $item['jenis_kelamin'] ?? null,
-                'status'         => 'aktif',
-                'updated_at'     => now(),
+            $passwordPlain = $nip ? substr($nip, -6) : Str::random(8);
+
+            $guruData = [
+                'nama'          => $item['nama'] ?? '',
+                'nip'           => $nip,
+                'email'         => $email,
+                'jenis_kelamin' => $item['jenis_kelamin'] ?? null,
+                'status'        => 'aktif',
+                'updated_at'    => now(),
             ];
 
             if ($guru) {
-                // UPDATE
-                DB::table('guru')->where('id', $guru->id)->update($data);
+                DB::table('guru')->where('id', $guru->id)->update($guruData);
             } else {
-                // INSERT
-                DB::table('guru')->insert(array_merge($data, [
-                    'password'   => Hash::make(Str::random(8)),
+                DB::table('guru')->insert(array_merge($guruData, [
+                    'password'   => Hash::make($passwordPlain),
                     'created_at' => now(),
                 ]));
             }
 
+            // =========================
+            // USER (LOGIN)
+            // =========================
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                User::create([
+                    'name'     => $item['nama'],
+                    'email'    => $email,
+                    'password' => Hash::make($passwordPlain),
+                    'role'     => 'guru',
+                ]);
+            }
+
             $count++;
         }
+
 
         $this->info("Berhasil sinkron {$count} guru");
         return 0;

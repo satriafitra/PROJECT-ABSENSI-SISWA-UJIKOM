@@ -18,6 +18,8 @@ class Guru extends Model
         'password',       // ⬅️ WAJIB
         'status',
         'jenis_kelamin',
+        'qr_token', // ⬅️ TAMBAH
+
     ];
 
     // otomatis hash password kalau di-set

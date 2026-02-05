@@ -6,9 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\User;
-
+use Illuminate\Support\Str;
 
 class FetchGuru extends Command
 {
@@ -19,7 +18,7 @@ class FetchGuru extends Command
     {
         $this->info("Mengambil data guru dari API Zieapi...");
 
-        $response = Http::timeout(60)->get(
+        $response = Http::timeout(120)->get(
             'https://zieapi.zielabs.id/api/getguru'
         );
 
@@ -39,53 +38,44 @@ class FetchGuru extends Command
 
         foreach ($guruArray as $item) {
 
-            $nip   = $item['nip'] ?? null;
-            $email = $item['email'] ?? null;
+            $email = trim($item['email'] ?? '');
 
-            if (!$email) continue; // LOGIN BUTUH EMAIL
+            if (!$email) continue;
+
+            $nip = trim($item['nip'] ?? '');
+            $nip = $nip === '' ? null : $nip;
 
             // =========================
             // GURU
             // =========================
-            $guru = DB::table('guru')->where('email', $email)->first();
-
-            $passwordPlain = $nip ? substr($nip, -6) : Str::random(8);
-
-            $guruData = [
-                'nama'          => $item['nama'] ?? '',
-                'nip'           => $nip,
-                'email'         => $email,
-                'jenis_kelamin' => $item['jenis_kelamin'] ?? null,
-                'status'        => 'aktif',
-                'updated_at'    => now(),
-            ];
-
-            if ($guru) {
-                DB::table('guru')->where('id', $guru->id)->update($guruData);
-            } else {
-                DB::table('guru')->insert(array_merge($guruData, [
-                    'password'   => Hash::make($passwordPlain),
-                    'created_at' => now(),
-                ]));
-            }
+            DB::table('guru')->updateOrInsert(
+                ['email' => $email],
+                [
+                    'nama'          => $item['nama'] ?? '',
+                    'nip'           => $nip,
+                    'jenis_kelamin' => $item['jenis_kelamin'] ?? null,
+                    'status'        => 'aktif',
+                    'password'      => Hash::make('12345'),
+                    'qr_token'      => DB::raw("COALESCE(qr_token, '" . Str::uuid() . "')"),
+                    'updated_at'    => now(),
+                    'created_at'    => now(),
+                ]
+            );
 
             // =========================
             // USER (LOGIN)
             // =========================
-            $user = User::where('email', $email)->first();
-
-            if (!$user) {
-                User::create([
+            User::updateOrCreate(
+                ['email' => $email],
+                [
                     'name'     => $item['nama'],
-                    'email'    => $email,
-                    'password' => Hash::make($passwordPlain),
+                    'password' => Hash::make('12345'),
                     'role'     => 'guru',
-                ]);
-            }
+                ]
+            );
 
             $count++;
         }
-
 
         $this->info("Berhasil sinkron {$count} guru");
         return 0;

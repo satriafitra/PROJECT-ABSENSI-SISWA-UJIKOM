@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+
 
 class FetchSiswa extends Command
 {
@@ -84,6 +86,7 @@ class FetchSiswa extends Command
                     'nis' => $nisn,
                     'name' => $item['nama'] ?? '',
                     'class_id' => $classId,
+                    'password' => Hash::make('12345'), // 🔥 DEFAULT
                     'qr_token' => Str::uuid(),
                     'created_at' => now(),
                     'updated_at' => now(),

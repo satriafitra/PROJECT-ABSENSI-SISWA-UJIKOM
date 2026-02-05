@@ -3,6 +3,8 @@
 use App\Models\Student;
 use App\Models\Guru;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+
 
 Route::get('/siswa', function () {
     // ambil semua siswa dengan relasi kelas
@@ -13,6 +15,8 @@ Route::get('/siswa', function () {
         'data' => $students
     ]);
 });
+
+Route::post('/login-siswa', [AuthController::class, 'loginSiswa']);
 
 // =====================
 // API GURU (CEK HASIL FETCH)

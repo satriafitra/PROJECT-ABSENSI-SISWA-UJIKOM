@@ -43,4 +43,17 @@ class AttendanceController extends Controller
             'time'    => Carbon::now()->format('H:i:s'),
         ], 201);
     }
+
+    public function history($student_id)
+    {
+        $attendances = Attendance::with('guru')
+            ->where('student_id', $student_id)
+            ->orderBy('date', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $attendances
+        ]);
+    }
 }

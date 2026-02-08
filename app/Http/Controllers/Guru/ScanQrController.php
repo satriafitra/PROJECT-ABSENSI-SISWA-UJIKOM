@@ -56,6 +56,7 @@ class ScanQrController extends Controller
 
         // cegah absen dobel
         $already = Attendance::where('student_id', $request->student_id)
+            ->where('guru_id', $guru->id) // ✅ tambahkan ini
             ->where('date', $today)
             ->exists();
 

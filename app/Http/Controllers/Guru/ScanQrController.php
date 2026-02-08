@@ -52,7 +52,7 @@ class ScanQrController extends Controller
 
         $guru = Guru::where('qr_token', $request->qr_token)->firstOrFail();
 
-        $today = Carbon::today()->toDateString();
+        $today = Carbon::now('Asia/Jakarta')->toDateString();
 
         // cegah absen dobel
         $already = Attendance::where('student_id', $request->student_id)
@@ -71,7 +71,7 @@ class ScanQrController extends Controller
             'student_id' => $request->student_id,
             'guru_id'    => $guru->id,
             'date'       => $today,
-            'check_in'   => now()->format('H:i:s'),
+            'check_in' => Carbon::now('Asia/Jakarta')->format('H:i:s'),
             'status'     => 'hadir',
         ]);
 
@@ -80,7 +80,7 @@ class ScanQrController extends Controller
             'message' => 'Absensi berhasil',
             'guru'    => $guru->nama,
             'tanggal' => $today,
-            'waktu'   => now()->format('H:i:s'),
+            'waktu'   => Carbon::now('Asia/Jakarta')->format('H:i:s'),
         ], 201);
     }
 }

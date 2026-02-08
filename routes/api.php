@@ -4,6 +4,7 @@ use App\Models\Student;
 use App\Models\Guru;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AttendanceController;
 
 
 Route::get('/siswa', function () {
@@ -30,3 +31,5 @@ Route::get('/guru', function () {
         'data'   => $gurus
     ]);
 });
+
+Route::post('/attendance', [AttendanceController::class, 'store']);

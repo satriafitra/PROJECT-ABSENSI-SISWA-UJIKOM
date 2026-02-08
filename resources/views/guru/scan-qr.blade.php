@@ -14,8 +14,14 @@
     .glass-effect { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     .qr-frame { position: relative; padding: 20px; background: white; border-radius: 24px; display: inline-block; }
     .qr-frame::before { 
-        content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        border: 4px solid #FF6B35; border-radius: 24px; clip-path: polygon(0 0, 20% 0, 20% 5%, 5% 5%, 5% 20%, 0 20%, 0 0, 100% 0, 100% 20%, 95% 20%, 95% 5%, 80% 5%, 80% 0, 100% 0, 100% 100%, 80% 100%, 80% 95%, 95% 95%, 95% 80%, 100% 80%, 100% 100%, 0 100%, 0 80%, 5% 80%, 5% 95%, 20% 95%, 20% 100%, 0 100%);
+        content: ''; position: absolute; inset: 0;
+        border: 4px solid #FF6B35; border-radius: 24px;
+        clip-path: polygon(
+            0 0, 20% 0, 20% 5%, 5% 5%, 5% 20%, 0 20%,
+            0 0, 100% 0, 100% 20%, 95% 20%, 95% 5%, 80% 5%, 80% 0,
+            100% 0, 100% 100%, 80% 100%, 80% 95%, 95% 95%, 95% 80%, 100% 80%,
+            100% 100%, 0 100%, 0 80%, 5% 80%, 5% 95%, 20% 95%, 20% 100%, 0 100%
+        );
     }
 </style>
 
@@ -30,15 +36,13 @@
                 Siswa dapat melakukan scan untuk mencatat kehadiran guru mengajar.
             </p>
         </div>
-        <div class="flex gap-3">
-            <button onclick="location.reload()" class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-2xl font-semibold hover:bg-gray-50 transition shadow-sm">
-                <i class="fa-solid fa-rotate"></i> Refresh
-            </button>
-        </div>
+        <button onclick="location.reload()" class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-2xl font-semibold hover:bg-gray-50 transition shadow-sm">
+            <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
     </div>
 
     <div class="grid lg:grid-cols-5 gap-8">
-        
+        {{-- PROFIL GURU --}}
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white qr-card rounded-3xl p-8 shadow-sm">
                 <div class="flex items-center gap-4 mb-8">
@@ -52,93 +56,74 @@
                 </div>
 
                 <div class="space-y-6">
-                    <div class="group">
+                    <div>
                         <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Nama Lengkap</label>
-                        <p class="text-lg font-semibold text-gray-800 group-hover:text-orange-600 transition">{{ $guru->nama }}</p>
+                        <p class="text-lg font-semibold text-gray-800">{{ $guru->nama }}</p>
                     </div>
-                    
-                    <div class="group">
-                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Email Instansi</label>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Email</label>
                         <p class="text-lg font-semibold text-gray-800">{{ $guru->email }}</p>
                     </div>
 
                     @if($guru->nip)
-                    <div class="group">
-                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">NIP / Identitas</label>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">NIP</label>
                         <p class="text-lg font-semibold text-gray-800">{{ $guru->nip }}</p>
                     </div>
                     @endif
 
-                    <div class="pt-4">
-                        <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold
-                            {{ $guru->status === 'aktif' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
-                            <span class="w-2 h-2 rounded-full mr-2 {{ $guru->status === 'aktif' ? 'bg-green-600' : 'bg-red-600' }} animate-pulse"></span>
-                            {{ strtoupper($guru->status) }}
-                        </span>
-                    </div>
+                    <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold
+                        {{ $guru->status === 'aktif' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
+                        <span class="w-2 h-2 rounded-full mr-2 {{ $guru->status === 'aktif' ? 'bg-green-600' : 'bg-red-600' }} animate-pulse"></span>
+                        {{ strtoupper($guru->status) }}
+                    </span>
                 </div>
             </div>
-
-            <a href="{{ route('guru.scan.export') }}" class="block bg-gradient-orange p-6 rounded-3xl text-white shadow-lg shadow-orange-200 hover:shadow-orange-300 transition group">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-lg">Rekap Absensi</h3>
-                        <p class="text-orange-100 text-sm">Download laporan kehadiran (.xlsx)</p>
-                    </div>
-                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
-                        <i class="fa-solid fa-file-export text-xl text-white"></i>
-                    </div>
-                </div>
-            </a>
         </div>
 
+        {{-- QR CODE --}}
         <div class="lg:col-span-3">
-            <div class="bg-white qr-card rounded-3xl p-10 shadow-sm border-2 border-dashed border-orange-100 flex flex-col items-center justify-center text-center">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Scan Kehadiran</h2>
-                    <p class="text-gray-500 mt-1">Arahkan kamera siswa ke QR Code di bawah ini</p>
-                </div>
+            <div class="bg-white qr-card rounded-3xl p-10 shadow-sm border-2 border-dashed border-orange-100 text-center">
+                <h2 class="text-2xl font-extrabold text-gray-800 mb-2">Scan Kehadiran</h2>
+                <p class="text-gray-500 mb-6">Arahkan kamera siswa ke QR Code di bawah</p>
 
-                <div class="qr-frame my-4 shadow-2xl shadow-orange-100">
+                <div class="qr-frame shadow-2xl shadow-orange-100">
                     {!! QrCode::size(280)
                         ->gradient(255, 107, 53, 255, 142, 98, 'diagonal')
                         ->margin(1)
                         ->generate($qrData) !!}
                 </div>
 
-                <div class="mt-8 grid grid-cols-2 gap-4 w-full max-w-md">
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <i class="fa-solid fa-clock text-orange-500 mb-2"></i>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Waktu</p>
-                        <p class="text-sm font-bold text-gray-700" id="current-time">00:00:00</p>
+                <div class="mt-8 grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    <div class="p-4 bg-slate-50 rounded-2xl border">
+                        <i class="fa-solid fa-clock text-orange-500"></i>
+                        <p class="text-xs font-bold text-gray-500 mt-1">Waktu</p>
+                        <p id="current-time" class="text-sm font-bold text-gray-700">00:00:00</p>
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <i class="fa-solid fa-calendar-day text-orange-500 mb-2"></i>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Tanggal</p>
+                    <div class="p-4 bg-slate-50 rounded-2xl border">
+                        <i class="fa-solid fa-calendar-day text-orange-500"></i>
+                        <p class="text-xs font-bold text-gray-500 mt-1">Tanggal</p>
                         <p class="text-sm font-bold text-gray-700">{{ date('d M Y') }}</p>
                     </div>
                 </div>
 
                 <p class="mt-8 text-xs text-gray-400 italic">
-                    <i class="fa-solid fa-shield-halved mr-1 text-green-500"></i> QR Code ini aman dan diperbarui secara otomatis oleh sistem.
+                    <i class="fa-solid fa-shield-halved text-green-500 mr-1"></i>
+                    QR Code valid dan aman digunakan untuk absensi hari ini
                 </p>
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
-    // Live Clock Function
     function updateClock() {
         const now = new Date();
-        const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                        now.getMinutes().toString().padStart(2, '0') + ":" + 
-                        now.getSeconds().toString().padStart(2, '0');
-        document.getElementById('current-time').textContent = timeStr;
+        document.getElementById('current-time').textContent =
+            now.toLocaleTimeString('id-ID', { hour12: false });
     }
     setInterval(updateClock, 1000);
     updateClock();
 </script>
-
 @endsection

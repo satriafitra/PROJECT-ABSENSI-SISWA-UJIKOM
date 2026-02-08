@@ -12,67 +12,60 @@ use Carbon\Carbon;
 class ScanQrController extends Controller
 {
     /**
-     * Halaman QR Guru (guru login)
+     * Halaman QR Guru (WEB)
      */
     public function index()
     {
         $user = Auth::user();
 
-        // pastikan guru
         if ($user->role !== 'guru') {
             abort(403, 'Akses ditolak');
         }
 
-        // ambil data guru
-        $guru = Guru::where('email', $user->email)->first();
-        if (!$guru) {
-            abort(404, 'Data guru tidak ditemukan');
+        $guru = Guru::where('email', $user->email)->firstOrFail();
+
+        // pastikan token ada
+        if (!$guru->qr_token) {
+            $guru->qr_token = bin2hex(random_bytes(16));
+            $guru->save();
         }
 
-        // QR guru (aman pakai token)
+        // QR DATA (AMAN)
         $qrData = json_encode([
-            'type'     => 'guru',
+            'type'     => 'attendance',
             'qr_token' => $guru->qr_token,
+            'date'     => Carbon::today()->toDateString(),
         ]);
 
         return view('guru.scan-qr', compact('qrData', 'guru'));
     }
 
     /**
-     * ABSENSI SISWA (dipanggil dari Flutter)
-     * siswa scan QR guru
+     * ABSENSI SISWA (API - Flutter)
      */
     public function absen(Request $request)
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
-            'qr_token'   => 'required|exists:gurus,qr_token',
+            'qr_token'   => 'required|exists:guru,qr_token', // 🔥 FIX
         ]);
 
-        // cari guru dari qr_token
-        $guru = Guru::where('qr_token', $request->qr_token)->first();
-        if (!$guru) {
-            return response()->json([
-                'status' => false,
-                'message' => 'QR guru tidak valid'
-            ], 404);
-        }
+        $guru = Guru::where('qr_token', $request->qr_token)->firstOrFail();
 
         $today = Carbon::today()->toDateString();
 
         // cegah absen dobel
-        $exists = Attendance::where('student_id', $request->student_id)
+        $already = Attendance::where('student_id', $request->student_id)
             ->where('date', $today)
             ->exists();
 
-        if ($exists) {
+        if ($already) {
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Kamu sudah absen hari ini'
             ], 409);
         }
 
-        // simpan absensi
         Attendance::create([
             'student_id' => $request->student_id,
             'guru_id'    => $guru->id,

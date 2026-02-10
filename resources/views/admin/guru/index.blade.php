@@ -22,6 +22,30 @@
         </a>
     </div>
 
+    <!-- SEARCH NAMA GURU -->
+    <div class="mb-6">
+        <form method="GET" action="{{ route('admin.guru.index') }}">
+            <div class="flex items-center gap-3 max-w-md">
+                <div class="relative w-full">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari nama guru..."
+                        class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                </div>
+
+                <button
+                    type="submit"
+                    class="px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow">
+                    Cari
+                </button>
+            </div>
+        </form>
+    </div>
+
+
     @if(session('success'))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -52,7 +76,8 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($gurus as $guru)
                     <tr class="hover:bg-orange-50/50 transition-colors duration-200">
-                        <td class="p-5 text-gray-500 font-medium">{{ $loop->iteration }}</td>
+                        <td class="p-5 text-gray-500 font-medium">{{ $gurus->firstItem() + $loop->index }}
+                        </td>
                         <td class="p-5">
                             <div class="flex items-center gap-3">
                                 <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
@@ -69,26 +94,26 @@
                         </td>
                         <td class="p-5">
                             @if($guru->status === 'aktif')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-                                    Aktif
-                                </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
+                                Aktif
+                            </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
-                                    Non-Aktif
-                                </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
+                                Non-Aktif
+                            </span>
                             @endif
                         </td>
                         <td class="p-5">
                             @if($guru->password)
-                                <div class="flex items-center gap-1 text-xs text-green-600 font-semibold">
-                                    <i class="fas fa-check-circle"></i> Password Set
-                                </div>
+                            <div class="flex items-center gap-1 text-xs text-green-600 font-semibold">
+                                <i class="fas fa-check-circle"></i> Password Set
+                            </div>
                             @else
-                                <div class="flex items-center gap-1 text-xs text-gray-400 font-semibold">
-                                    <i class="fas fa-times-circle"></i> Belum Set
-                                </div>
+                            <div class="flex items-center gap-1 text-xs text-gray-400 font-semibold">
+                                <i class="fas fa-times-circle"></i> Belum Set
+                            </div>
                             @endif
                         </td>
                         <td class="p-5 text-center">
@@ -126,6 +151,10 @@
                     @endforelse
                 </tbody>
             </table>
+            <!-- PAGINATION -->
+            <div class="px-6 py-4 border-t border-gray-100">
+                {{ $gurus->links('vendor.pagination.tailwind') }}
+            </div>
         </div>
     </div>
 </div>
@@ -135,7 +164,7 @@
     function confirmDelete(event) {
         event.preventDefault();
         const form = event.target;
-        
+
         Swal.fire({
             title: 'Hapus data guru?',
             text: "Tindakan ini tidak dapat dibatalkan!",

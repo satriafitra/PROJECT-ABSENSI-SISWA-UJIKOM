@@ -59,7 +59,7 @@
                     
                     <div class="hidden md:block">
                         <h2 class="text-sm font-bold text-slate-400 uppercase tracking-[2px]">Sistem Informasi</h2>
-                        <p class="text-xs text-orange-500 font-medium italic">SD Negeri AkvaScan</p>
+                        <p class="text-xs text-orange-500 font-medium italic">Smk Negeri AkvaScan</p>
                     </div>
                 </div>
 

@@ -21,15 +21,18 @@
             font-weight: 600;
             font-size: 0.95rem;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            color: #64748b; /* Slate 500 */
+            color: #64748b;
+            /* Slate 500 */
             position: relative;
             overflow: hidden;
         }
 
         /* Hover Effect */
         .sidebar-item:hover {
-            color: #f97316; /* Orange 500 */
-            background: #fff7ed; /* Orange 50 */
+            color: #f97316;
+            /* Orange 500 */
+            background: #fff7ed;
+            /* Orange 50 */
             padding-left: 24px;
         }
 
@@ -63,7 +66,7 @@
             {{-- ADMIN MENU --}}
             @if(auth()->user()->role === 'admin')
             <div class="menu-label">Main Administrator</div>
-            
+
             <li>
                 <a href="{{ route('admin.dashboard') }}"
                     class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -136,11 +139,12 @@
             </li>
 
             <li>
-                <a href="#" class="sidebar-item">
+                <a href="{{ route('guru.rekap.absensi', ['date' => now()->toDateString()]) }}" class="sidebar-item">
                     <i data-lucide="calendar-check" class="w-5 h-5"></i>
                     Absensi Hari Ini
                 </a>
             </li>
+
             @endif
 
         </ul>

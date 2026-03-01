@@ -7,12 +7,15 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Guru\ScanQrController;
+use App\Http\Controllers\Guru\RekapAbsensiController;
+
 
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -90,6 +93,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/scan-qr', [ScanQrController::class, 'index'])->name('scan.qr');
         Route::get('/scan-qr/export', [ScanQrController::class, 'export'])->name('scan.export');
+
+        Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])
+            ->name('rekap.absensi');
     });
 
     /*

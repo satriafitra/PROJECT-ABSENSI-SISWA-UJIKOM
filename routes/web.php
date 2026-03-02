@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Guru\RekapAbsensiController;
-
+use App\Http\Controllers\Admin\LokasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +61,14 @@ Route::middleware(['auth'])->group(function () {
         Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
         Route::view('/rombel', 'admin.rombel')->name('rombel');
         Route::view('/rekap-absensi', 'admin.rekapabsensi')->name('rekapabsensi');
+
+        // LOKASI
+        Route::get('/lokasi', [LokasiController::class, 'index'])->name('lokasi.index');
+        Route::get('/lokasi/create', [LokasiController::class, 'create'])->name('lokasi.create');
+        Route::post('/lokasi', [LokasiController::class, 'store'])->name('lokasi.store');
+        Route::get('/lokasi/{id}/edit', [LokasiController::class, 'edit'])->name('lokasi.edit');
+        Route::put('/lokasi/{id}', [LokasiController::class, 'update'])->name('lokasi.update');
+        Route::delete('/lokasi/{id}', [LokasiController::class, 'destroy'])->name('lokasi.destroy');
 
         // SISWA
         Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index');

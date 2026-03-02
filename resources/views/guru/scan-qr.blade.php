@@ -15,7 +15,7 @@
     .qr-frame { position: relative; padding: 20px; background: white; border-radius: 24px; display: inline-block; }
     .qr-frame::before { 
         content: ''; position: absolute; inset: 0;
-        border: 4px solid #FF6B35; border-radius: 24px;
+        border: 4px solid #b94116; border-radius: 24px;
         clip-path: polygon(
             0 0, 20% 0, 20% 5%, 5% 5%, 5% 20%, 0 20%,
             0 0, 100% 0, 100% 20%, 95% 20%, 95% 5%, 80% 5%, 80% 0,

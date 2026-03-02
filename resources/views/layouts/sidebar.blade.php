@@ -116,6 +116,14 @@
                     Rekap Absensi
                 </a>
             </li>
+
+            <li>
+                <a href="{{ route('admin.lokasi.index') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.lokasi.index') ? 'active' : '' }}">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                    Lokasi Absensi
+                </a>
+            </li>
             @endif
 
             {{-- GURU MENU --}}

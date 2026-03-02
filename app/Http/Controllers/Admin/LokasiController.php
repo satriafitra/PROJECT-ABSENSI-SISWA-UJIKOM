@@ -5,92 +5,99 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Lokasi;
+use Exception;
 
 class LokasiController extends Controller
 {
-    // =========================
-    // TAMPILKAN DATA LOKASI
-    // =========================
+    /**
+     * Tampilkan halaman utama (Daftar Lokasi & Map)
+     */
     public function index()
     {
+        // Mengambil data terbaru agar muncul paling atas di list interaktif
         $lokasi = Lokasi::latest()->get();
         return view('admin.lokasi.index', compact('lokasi'));
     }
 
-    // =========================
-    // FORM TAMBAH LOKASI
-    // =========================
-    public function create()
-    {
-        return view('admin.lokasi.create');
-    }
-
-    // =========================
-    // SIMPAN LOKASI
-    // =========================
+    /**
+     * Simpan data lokasi baru dari form/klik map
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'nama_lokasi' => 'required',
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'radius' => 'required|numeric'
+            'nama_lokasi' => 'required|string|max:255',
+            'latitude'    => 'required|numeric',
+            'longitude'   => 'required|numeric',
+            'radius'      => 'required|numeric|min:5'
+        ], [
+            'nama_lokasi.required' => 'Nama lokasi/instansi tidak boleh kosong',
+            'latitude.required'    => 'Silahkan tentukan titik koordinat pada peta',
+            'radius.min'           => 'Radius minimal adalah 5 meter'
         ]);
 
-        Lokasi::create([
-            'nama_lokasi' => $request->nama_lokasi,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'radius' => $request->radius
-        ]);
+        try {
+            Lokasi::create([
+                'nama_lokasi' => $request->nama_lokasi,
+                'latitude'    => $request->latitude,
+                'longitude'   => $request->longitude,
+                'radius'      => $request->radius
+            ]);
 
-        return redirect()->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil ditambahkan');
+            return redirect()->route('admin.lokasi.index')
+                ->with('success', 'Titik lokasi berhasil didaftarkan ke sistem!');
+                
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
     }
 
-    // =========================
-    // FORM EDIT
-    // =========================
+    /**
+     * Form edit (jika diperlukan halaman terpisah)
+     */
     public function edit($id)
     {
         $lokasi = Lokasi::findOrFail($id);
         return view('admin.lokasi.edit', compact('lokasi'));
     }
 
-    // =========================
-    // UPDATE LOKASI
-    // =========================
+    /**
+     * Update data lokasi
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nama_lokasi' => 'required',
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'radius' => 'required|numeric'
+            'nama_lokasi' => 'required|string|max:255',
+            'latitude'    => 'required|numeric',
+            'longitude'   => 'required|numeric',
+            'radius'      => 'required|numeric'
         ]);
 
-        $lokasi = Lokasi::findOrFail($id);
+        try {
+            $lokasi = Lokasi::findOrFail($id);
+            $lokasi->update($request->all());
 
-        $lokasi->update([
-            'nama_lokasi' => $request->nama_lokasi,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'radius' => $request->radius
-        ]);
-
-        return redirect()->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil diperbarui');
+            return redirect()->route('admin.lokasi.index')
+                ->with('success', 'Konfigurasi lokasi berhasil diperbarui');
+                
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        }
     }
 
-    // =========================
-    // HAPUS LOKASI
-    // =========================
+    /**
+     * Hapus lokasi
+     */
     public function destroy($id)
     {
-        $lokasi = Lokasi::findOrFail($id);
-        $lokasi->delete();
+        try {
+            $lokasi = Lokasi::findOrFail($id);
+            $lokasi->delete();
 
-        return redirect()->route('admin.lokasi.index')
-            ->with('success', 'Lokasi berhasil dihapus');
+            return redirect()->route('admin.lokasi.index')
+                ->with('success', 'Lokasi berhasil dihapus dari daftar');
+                
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal menghapus data');
+        }
     }
 }

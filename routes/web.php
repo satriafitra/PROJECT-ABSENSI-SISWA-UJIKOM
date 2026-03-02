@@ -60,8 +60,8 @@ Route::middleware(['auth'])->group(function () {
         // MASTER DATA
         Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
         Route::view('/rombel', 'admin.rombel')->name('rombel');
-        Route::view('/rekap-absensi', 'admin.rekapabsensi')->name('rekapabsensi');
-
+        // Ganti Route::view menjadi Route::get
+        Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])->name('rekapabsensi');
         // LOKASI
         Route::get('/lokasi', [LokasiController::class, 'index'])->name('lokasi.index');
         Route::get('/lokasi/create', [LokasiController::class, 'create'])->name('lokasi.create');

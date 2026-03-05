@@ -18,7 +18,6 @@ use App\Http\Controllers\Guru\RekapAbsensiController;
 | PUBLIC
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', function () {
     return view('welcome');
 });
@@ -28,15 +27,9 @@ Route::get('/', function () {
 | AUTHENTICATED ROUTES
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth'])->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD REDIRECT SESUAI ROLE
-    |--------------------------------------------------------------------------
-    */
-
+    // Redirect dashboard sesuai role
     Route::get('/dashboard', function () {
         $user = Auth::user();
 
@@ -56,51 +49,36 @@ Route::middleware(['auth'])->group(function () {
     | ADMIN ROUTES
     |--------------------------------------------------------------------------
     */
-
     Route::middleware('can:isAdmin')
         ->prefix('admin')
         ->name('admin.')
         ->group(function () {
 
-            // DASHBOARD
-            Route::get('/dashboard', [DashboardController::class, 'index'])
-                ->name('dashboard');
+            // Dashboard
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-            // MASTER DATA
+            // Master Data
             Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
             Route::view('/rombel', 'admin.rombel')->name('rombel');
 
-            Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])
-                ->name('rekapabsensi');
+            Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])->name('rekapabsensi');
 
-            /*
-            |--------------------------------------------------------------------------
-            | LOKASI
-            |--------------------------------------------------------------------------
-            */
+            // Lokasi
             Route::resource('lokasi', LokasiController::class);
 
-            /*
-            |--------------------------------------------------------------------------
-            | SISWA
-            |--------------------------------------------------------------------------
-            */
+            // Siswa
             Route::resource('siswa', SiswaController::class);
 
-            /*
-            |--------------------------------------------------------------------------
-            | GURU
-            |--------------------------------------------------------------------------
-            */
+            // Guru
             Route::resource('guru', GuruController::class);
 
-            /*
-            |--------------------------------------------------------------------------
-            | JADWAL GURU
-            |--------------------------------------------------------------------------
-            */
-            Route::get('/jadwal-guru', [JadwalGuruController::class, 'index'])
-                ->name('jadwal.index');
+            // Jadwal Guru (CRUD)
+            Route::get('jadwal', [JadwalGuruController::class, 'index'])->name('jadwal.index');
+            Route::get('jadwal/create', [JadwalGuruController::class, 'create'])->name('jadwal.create');
+            Route::post('jadwal', [JadwalGuruController::class, 'store'])->name('jadwal.store');
+            Route::get('jadwal/{id}/edit', [JadwalGuruController::class, 'edit'])->name('jadwal.edit');
+            Route::put('jadwal/{id}', [JadwalGuruController::class, 'update'])->name('jadwal.update');
+            Route::delete('jadwal/{id}', [JadwalGuruController::class, 'destroy'])->name('jadwal.destroy');
         });
 
     /*
@@ -108,7 +86,6 @@ Route::middleware(['auth'])->group(function () {
     | GURU ROUTES
     |--------------------------------------------------------------------------
     */
-
     Route::middleware('can:isGuru')
         ->prefix('guru')
         ->name('guru.')
@@ -118,14 +95,10 @@ Route::middleware(['auth'])->group(function () {
                 return view('guru.dashboard');
             })->name('dashboard');
 
-            Route::get('/scan-qr', [ScanQrController::class, 'index'])
-                ->name('scan.qr');
+            Route::get('/scan-qr', [ScanQrController::class, 'index'])->name('scan.qr');
+            Route::get('/scan-qr/export', [ScanQrController::class, 'export'])->name('scan.export');
 
-            Route::get('/scan-qr/export', [ScanQrController::class, 'export'])
-                ->name('scan.export');
-
-            Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])
-                ->name('rekap.absensi');
+            Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])->name('rekap.absensi');
         });
 
     /*
@@ -133,15 +106,9 @@ Route::middleware(['auth'])->group(function () {
     | PROFILE
     |--------------------------------------------------------------------------
     */
-
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__ . '/auth.php';

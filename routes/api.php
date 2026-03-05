@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Guru\ScanQrController;
+use App\Http\Controllers\Api\ScheduleController;
+
 
 
 Route::get('/siswa', function () {
@@ -37,6 +39,9 @@ Route::post('/attendance', [AttendanceController::class, 'store']);
 Route::get('/attendance/{student_id}', [AttendanceController::class, 'history']);
 
 Route::post('/absen', [ScanQrController::class, 'absen']);
+
+Route::get('/schedule/class/{class_id}', [ScheduleController::class, 'byClass']);
+Route::get('/schedule/today/{class_id}', [ScheduleController::class, 'todayByClass']);
 
 Route::get('/debug/guru-token', function () {
     return response()->json([

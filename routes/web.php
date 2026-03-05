@@ -2,13 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Admin\LokasiController;
+use App\Http\Controllers\Admin\JadwalGuruController;
+
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Guru\RekapAbsensiController;
-use App\Http\Controllers\Admin\LokasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,13 +28,15 @@ Route::get('/', function () {
 | AUTHENTICATED ROUTES
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | DASHBOARD REDIRECT (AUTO SESUAI ROLE)
+    | DASHBOARD REDIRECT SESUAI ROLE
     |--------------------------------------------------------------------------
     */
+
     Route::get('/dashboard', function () {
         $user = Auth::user();
 
@@ -48,72 +53,95 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN ROUTES (KHUSUS ADMIN)
+    | ADMIN ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::middleware('can:isAdmin')->prefix('admin')->name('admin.')->group(function () {
 
-        // DASHBOARD
-        Route::get('/dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard');
+    Route::middleware('can:isAdmin')
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
 
-        // MASTER DATA
-        Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
-        Route::view('/rombel', 'admin.rombel')->name('rombel');
-        // Ganti Route::view menjadi Route::get
-        Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])->name('rekapabsensi');
-        // LOKASI
-        Route::get('/lokasi', [LokasiController::class, 'index'])->name('lokasi.index');
-        Route::get('/lokasi/create', [LokasiController::class, 'create'])->name('lokasi.create');
-        Route::post('/lokasi', [LokasiController::class, 'store'])->name('lokasi.store');
-        Route::get('/lokasi/{id}/edit', [LokasiController::class, 'edit'])->name('lokasi.edit');
-        Route::put('/lokasi/{id}', [LokasiController::class, 'update'])->name('lokasi.update');
-        Route::delete('/lokasi/{id}', [LokasiController::class, 'destroy'])->name('lokasi.destroy');
+            // DASHBOARD
+            Route::get('/dashboard', [DashboardController::class, 'index'])
+                ->name('dashboard');
 
-        // SISWA
-        Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index');
-        Route::get('/siswa/create', [SiswaController::class, 'create'])->name('siswa.create');
-        Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
-        Route::get('/siswa/{id}/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
-        Route::put('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
-        Route::delete('/siswa/{id}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
+            // MASTER DATA
+            Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
+            Route::view('/rombel', 'admin.rombel')->name('rombel');
 
-        // GURU
-        Route::prefix('guru')->name('guru.')->group(function () {
-            Route::get('/', [GuruController::class, 'index'])->name('index');
-            Route::get('/create', [GuruController::class, 'create'])->name('create');
-            Route::post('/', [GuruController::class, 'store'])->name('store');
-            Route::get('/{guru}/edit', [GuruController::class, 'edit'])->name('edit');
-            Route::put('/{guru}', [GuruController::class, 'update'])->name('update');
-            Route::delete('/{guru}', [GuruController::class, 'destroy'])->name('destroy');
+            Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])
+                ->name('rekapabsensi');
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOKASI
+            |--------------------------------------------------------------------------
+            */
+            Route::resource('lokasi', LokasiController::class);
+
+            /*
+            |--------------------------------------------------------------------------
+            | SISWA
+            |--------------------------------------------------------------------------
+            */
+            Route::resource('siswa', SiswaController::class);
+
+            /*
+            |--------------------------------------------------------------------------
+            | GURU
+            |--------------------------------------------------------------------------
+            */
+            Route::resource('guru', GuruController::class);
+
+            /*
+            |--------------------------------------------------------------------------
+            | JADWAL GURU
+            |--------------------------------------------------------------------------
+            */
+            Route::get('/jadwal-guru', [JadwalGuruController::class, 'index'])
+                ->name('jadwal.index');
         });
-    });
 
     /*
     |--------------------------------------------------------------------------
-    | GURU ROUTES (KHUSUS GURU)
+    | GURU ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::middleware('can:isGuru')->prefix('guru')->name('guru.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('guru.dashboard');
-        })->name('dashboard');
 
-        Route::get('/scan-qr', [ScanQrController::class, 'index'])->name('scan.qr');
-        Route::get('/scan-qr/export', [ScanQrController::class, 'export'])->name('scan.export');
+    Route::middleware('can:isGuru')
+        ->prefix('guru')
+        ->name('guru.')
+        ->group(function () {
 
-        Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])
-            ->name('rekap.absensi');
-    });
+            Route::get('/dashboard', function () {
+                return view('guru.dashboard');
+            })->name('dashboard');
+
+            Route::get('/scan-qr', [ScanQrController::class, 'index'])
+                ->name('scan.qr');
+
+            Route::get('/scan-qr/export', [ScanQrController::class, 'export'])
+                ->name('scan.export');
+
+            Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])
+                ->name('rekap.absensi');
+        });
 
     /*
     |--------------------------------------------------------------------------
     | PROFILE
     |--------------------------------------------------------------------------
     */
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
 });
 
 require __DIR__ . '/auth.php';

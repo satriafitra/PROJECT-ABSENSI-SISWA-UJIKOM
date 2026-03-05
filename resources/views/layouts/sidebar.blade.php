@@ -126,9 +126,9 @@
             </li>
 
             <li>
-                <a href="{{ route('admin.lokasi.index') }}"
-                    class="sidebar-item {{ request()->routeIs('admin.lokasi.index') ? 'active' : '' }}">
-                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                <a href="{{ route('admin.jadwal.index') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
                     Jadwal Guru
                 </a>
             </li>

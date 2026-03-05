@@ -62,6 +62,37 @@
         border-left: 5px solid var(--primary-orange);
     }
 
+    /* Floating Action Button untuk Lokasi SMKN 1 Cianjur */
+    .btn-recenter {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--primary-orange);
+        font-size: 1.2rem;
+    }
+
+    .btn-recenter:hover {
+        background: var(--primary-orange);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .btn-recenter:active {
+        transform: scale(0.95);
+    }
+
     /* Form Styling */
     .form-group-custom {
         margin-bottom: 5px;
@@ -173,11 +204,16 @@
             <h5 class="m-0 fw-bold"><i class="fa-solid fa-map-location-dot me-2 text-warning"></i>Lokasi Absensi</h5>
             <small class="text-muted">Klik peta atau daftar di bawah</small>
         </div>
+
+        <button class="btn-recenter" onclick="recenterSMKN1()" title="Ke SMKN 1 CIANJUR">
+            <i class="fa-solid fa-school"></i>
+        </button>
+
         <div id="map"></div>
     </div>
 
     <div class="section-card">
-        <h5 class="fw-bold mb-4 text-dark">Tambah Lokasi Baru</h5>
+        <h5 class="fw-bold mb-4 text-dark">Tambah/Update Lokasi</h5>
         <form action="{{ route('admin.lokasi.store') }}" method="POST">
             @csrf
             <div class="row g-4 align-items-end">
@@ -186,20 +222,20 @@
                         <label class="form-label">Nama Instansi / Lokasi</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa fa-building"></i></span>
-                            <input type="text" name="nama_lokasi" id="input_nama" class="form-control custom-input" placeholder="Contoh: Gedung Pusat SMA 1" required>
+                            <input type="text" name="nama_lokasi" id="input_nama" class="form-control custom-input" placeholder="Contoh: SMKN 1 CIANJUR" value="SMKN 1 CIANJUR" required>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4">
                     <div class="form-group-custom">
                         <label class="form-label">Latitude</label>
-                        <input type="text" id="latitude" name="latitude" class="form-control custom-input bg-light" placeholder="Otomatis" readonly required>
+                        <input type="text" id="latitude" name="latitude" class="form-control custom-input bg-light" value="-6.8265" readonly required>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4">
                     <div class="form-group-custom">
                         <label class="form-label">Longitude</label>
-                        <input type="text" id="longitude" name="longitude" class="form-control custom-input bg-light" placeholder="Otomatis" readonly required>
+                        <input type="text" id="longitude" name="longitude" class="form-control custom-input bg-light" value="107.1367" readonly required>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4">
@@ -221,7 +257,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h5 class="fw-bold m-0">Daftar Lokasi Terdaftar</h5>
-                <p class="text-muted small m-0">Klik ikon mata untuk memfokuskan peta</p>
+                <p class="text-muted small m-0">Gunakan tombol di atas peta untuk kembali ke koordinat sekolah</p>
             </div>
             <div class="header-icon text-warning fs-3">
                 <i class="fa-solid fa-list-check"></i>
@@ -285,20 +321,28 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Koordinat SMKN 1 CIANJUR
+    const smknLat = -6.8265;
+    const smknLng = 107.1367;
+    const smknRadius = 100;
+    const smknLabel = "SMKN 1 CIANJUR";
+
     // Inisialisasi Peta
     var map = L.map('map', {
         zoomControl: false
-    }).setView([-6.914744, 107.609810], 13);
+    }).setView([smknLat, smknLng], 17);
 
+    // Zoom control ke bawah kanan
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+    // Layer Peta (Light Mode)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
     var marker, circle;
 
-    // Fungsi Update Marker & Radius dengan Label Nama yang Dinamis
+    // Fungsi Utama Update Marker di Peta
     function updateMap(lat, lng, radius, label = "Titik Baru Terpilih", fly = true) {
         if (marker) map.removeLayer(marker);
         if (circle) map.removeLayer(circle);
@@ -310,7 +354,6 @@
             iconAnchor: [15, 42]
         });
 
-        // Popup sekarang menampilkan label (Nama Lokasi)
         marker = L.marker([lat, lng], { icon: customIcon }).addTo(map)
                 .bindPopup("<div style='font-family:Poppins; text-align:center;'><strong style='color:#FF8C00;'>" + label + "</strong><br><small>Lokasi Absensi</small></div>").openPopup();
 
@@ -327,22 +370,34 @@
         }
     }
 
-    // Fungsi Klik dari Tabel (Menerima parameter Nama)
+    // Fungsi Tombol "Icon Sekolah" di Peta
+    function recenterSMKN1() {
+        // Reset isi form input
+        document.getElementById('latitude').value = smknLat;
+        document.getElementById('longitude').value = smknLng;
+        document.getElementById('input_nama').value = smknLabel;
+        document.getElementById('radius_input').value = 100;
+        
+        // Update tampilan peta
+        updateMap(smknLat, smknLng, 100, smknLabel, true);
+    }
+
+    // Jalankan pertama kali saat load
+    updateMap(smknLat, smknLng, smknRadius, smknLabel, false);
+
+    // Fungsi dari tombol Lihat di Tabel
     function focusLocation(lat, lng, radius, nama) {
-        // Scroll ke peta
         document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
         
-        // Isi form jika user ingin mengedit/melihat
         document.getElementById('latitude').value = lat;
         document.getElementById('longitude').value = lng;
         document.getElementById('radius_input').value = radius;
         document.getElementById('input_nama').value = nama;
         
-        // Tampilkan di peta dengan Nama Lokasi Aslinya
         updateMap(lat, lng, radius, nama, true);
     }
 
-    // Event Klik Peta Manual
+    // Klik manual di Peta
     map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(8);
         var lng = e.latlng.lng.toFixed(8);
@@ -355,7 +410,7 @@
         updateMap(lat, lng, rad, namaInput, false);
     });
 
-    // Sinkronisasi Radius saat input angka berubah
+    // Input Radius Berubah
     document.getElementById('radius_input').addEventListener('input', function() {
         var lat = document.getElementById('latitude').value;
         var lng = document.getElementById('longitude').value;

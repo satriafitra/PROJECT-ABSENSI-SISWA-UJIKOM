@@ -11,11 +11,21 @@ class JadwalGuruController extends Controller
 {
     public function index(Request $request)
     {
-        $searchGuru = $request->query('guru');
+        // Mengambil input dari filter
+        $search = $request->query('search'); // Input teks
+        $guruId = $request->query('guru_id'); // Dropdown select
 
         $jadwals = JadwalGuru::with('guru')
-            ->when($searchGuru, function($query) use ($searchGuru) {
-                $query->whereHas('guru', fn($q) => $q->where('nama', 'like', "%{$searchGuru}%"));
+            // Filter berdasarkan Teks (Cari Nama Guru atau Mata Pelajaran)
+            ->when($search, function($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->whereHas('guru', fn($sq) => $sq->where('nama', 'like', "%{$search}%"))
+                      ->orWhere('mata_pelajaran', 'like', "%{$search}%");
+                });
+            })
+            // Filter berdasarkan Dropdown Guru
+            ->when($guruId, function($query) use ($guruId) {
+                $query->where('guru_id', $guruId);
             })
             ->orderBy('hari')
             ->orderBy('jam_mulai')
@@ -24,7 +34,7 @@ class JadwalGuruController extends Controller
 
         $gurus = Guru::orderBy('nama')->get();
 
-        return view('admin.jadwal.index', compact('jadwals', 'gurus', 'searchGuru'));
+        return view('admin.jadwal.index', compact('jadwals', 'gurus'));
     }
 
     public function create()
@@ -47,7 +57,7 @@ class JadwalGuruController extends Controller
         JadwalGuru::create($request->all());
 
         return redirect()->route('admin.jadwal.index')
-            ->with('success', 'Jadwal guru berhasil ditambahkan');
+            ->with('success', 'Jadwal guru berhasil ditambahkan secara aman!');
     }
 
     public function edit($id)
@@ -73,7 +83,7 @@ class JadwalGuruController extends Controller
         $jadwal->update($request->all());
 
         return redirect()->route('admin.jadwal.index')
-            ->with('success', 'Jadwal guru berhasil diperbarui');
+            ->with('success', 'Perubahan jadwal telah berhasil disimpan');
     }
 
     public function destroy($id)
@@ -81,6 +91,6 @@ class JadwalGuruController extends Controller
         JadwalGuru::findOrFail($id)->delete();
 
         return redirect()->route('admin.jadwal.index')
-            ->with('success', 'Jadwal guru berhasil dihapus');
+            ->with('success', 'Data jadwal telah dihapus dari sistem');
     }
 }

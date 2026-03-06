@@ -84,10 +84,10 @@
             </li>
 
             <li>
-                <a href="{{ route('admin.rombel') }}"
-                    class="sidebar-item {{ request()->routeIs('admin.rombel') ? 'active' : '' }}">
+                <a href="{{ route('admin.manual') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.manual') ? 'active' : '' }}">
                     <i data-lucide="layers" class="w-5 h-5"></i>
-                    Rombel
+                    Laporan Izin atau Sakit
                 </a>
             </li>
 

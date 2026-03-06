@@ -41,6 +41,7 @@ Route::post('/attendance', [AttendanceController::class, 'store']);
 Route::get('/attendance/{student_id}', [AttendanceController::class, 'history']);
 
 Route::post('/absen', [ScanQrController::class, 'absen']);
+Route::post('/absen-manual', [AttendanceController::class, 'storeManual']);
 
 // =====================
 // API JADWAL GURU

@@ -10,6 +10,8 @@ class Attendance extends Model
         'student_id',
         'guru_id',     // ⬅️ WAJIB
         'date',
+        'status',
+        'keterangan', // Tambahkan ini jika belum ada!
         'check_in',
         'check_out',
         'status',
@@ -18,7 +20,9 @@ class Attendance extends Model
     // relasi ke siswa
     public function student()
     {
-        return $this->belongsTo(Student::class);
+        // Sesuaikan 'student_id' dengan nama kolom di tabel attendances
+        // dan 'id' dengan primary key di tabel students
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
     // relasi ke guru

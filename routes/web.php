@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\LokasiController;
 use App\Http\Controllers\Admin\JadwalGuruController;
-
+use App\Http\Controllers\Admin\ManualAttendanceController; // Tambahkan ini!
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Guru\RekapAbsensiController;
 
@@ -18,6 +18,7 @@ use App\Http\Controllers\Guru\RekapAbsensiController;
 | PUBLIC
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -59,10 +60,11 @@ Route::middleware(['auth'])->group(function () {
 
             // Master Data
             Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
-            Route::view('/rombel', 'admin.rombel')->name('rombel');
+            Route::view('/absensi-manual', 'admin.manual')->name('manual');
 
+            Route::get('/absensi-manual', [ManualAttendanceController::class, 'index'])->name('manual'); 
+            
             Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])->name('rekapabsensi');
-
             // Lokasi
             Route::resource('lokasi', LokasiController::class);
 

@@ -59,4 +59,39 @@ class AttendanceController extends Controller
             'data'   => $attendances,
         ]);
     }
+
+    public function storeManual(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'status'     => 'required|in:sakit,izin',
+            'keterangan' => 'required|string|max:255',
+        ]);
+
+        $today = Carbon::now()->toDateString();
+
+        // Cek apakah sudah ada catatan (Hadir/Sakit/Izin) hari ini
+        $alreadyExists = Attendance::where('student_id', $request->student_id)
+            ->where('date', $today)
+            ->exists();
+
+        if ($alreadyExists) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Sudah ada catatan kehadiran untuk hari ini',
+            ], 409);
+        }
+
+        Attendance::create([
+            'student_id' => $request->student_id,
+            'date'       => $today,
+            'status'     => $request->status,
+            'keterangan' => $request->keterangan, // Pastikan kolom ini ada di database kamu
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Laporan ' . $request->status . ' berhasil dikirim',
+        ], 201);
+    }
 }

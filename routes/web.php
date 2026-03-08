@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\JadwalGuruController;
 use App\Http\Controllers\Admin\ManualAttendanceController; // Tambahkan ini!
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Guru\RekapAbsensiController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,9 +63,15 @@ Route::middleware(['auth'])->group(function () {
             Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
             Route::view('/absensi-manual', 'admin.manual')->name('manual');
 
-            Route::get('/absensi-manual', [ManualAttendanceController::class, 'index'])->name('manual'); 
-            
+            Route::get('/absensi-manual', [ManualAttendanceController::class, 'index'])->name('manual');
+
             Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])->name('rekapabsensi');
+
+            Route::get('/admin/rekap-absensi', [AdminController::class, 'rekapAbsensi'])->name('admin.rekap');
+
+            // Route untuk export
+            Route::get('/rekap-absensi/excel', [AdminController::class, 'exportExcel'])->name('rekap.excel');
+            Route::get('/rekap-absensi/pdf', [AdminController::class, 'exportPdf'])->name('rekap.pdf');
             // Lokasi
             Route::resource('lokasi', LokasiController::class);
 

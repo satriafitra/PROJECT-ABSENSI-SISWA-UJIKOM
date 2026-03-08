@@ -136,7 +136,7 @@
                             <td class="px-5 py-4">
                                 <div class="flex flex-col">
                                     <span class="text-xs font-semibold text-slate-700">{{ $item->guru->nama ?? 'Sistem' }}</span>
-                                    <span class="text-[9px] text-slate-400 font-medium">Verified PKL</span>
+                                    <span class="text-[9px] text-slate-400 font-medium">Verified System</span>
                                 </div>
                             </td>
                             <td class="px-5 py-4">
@@ -155,17 +155,26 @@
                                 </div>
                             </td>
                             <td class="px-5 py-4 text-center">
-                                @if($item->status == 'Hadir')
+                                {{-- PERBAIKAN LOGIKA STATUS DI SINI --}}
+                                @php
+                                    $status = strtolower($item->status);
+                                @endphp
+
+                                @if($status == 'hadir')
                                     <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-100">
                                         Hadir
                                     </span>
-                                @elseif($item->status == 'Izin')
+                                @elseif($status == 'izin')
                                     <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100">
                                         Izin
                                     </span>
-                                @else
+                                @elseif($status == 'sakit')
                                     <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100">
                                         Sakit
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
+                                        {{ $item->status ?? 'Alpha' }}
                                     </span>
                                 @endif
                             </td>

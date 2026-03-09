@@ -43,11 +43,13 @@ Route::get('/attendance/{student_id}', [AttendanceController::class, 'history'])
 Route::post('/absen', [ScanQrController::class, 'absen']);
 Route::post('/absen-manual', [AttendanceController::class, 'storeManual']);
 
+
 // =====================
 // API JADWAL GURU
 // =====================
 
 // List semua jadwal guru / filter by guru_id & hari
+
 Route::get('/jadwal-guru', [JadwalGuruApiController::class, 'index']);
 
 // Tambah jadwal guru baru

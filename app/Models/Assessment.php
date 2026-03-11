@@ -14,16 +14,19 @@ class Assessment extends Model
         'general_notes'
     ]; 
 
-    // Relasi ke User (Guru/Penilai)
+    // Relasi ke User (Guru/Penilai tetap menggunakan User karena Guru login sebagai User)
     public function evaluator()
     {
         return $this->belongsTo(User::class, 'evaluator_id');
     }
 
-    // Relasi ke User (Siswa/Yang dinilai)
+    /**
+     * PERBAIKAN: Relasi ke Student (Yang dinilai)
+     * Diarahkan ke model Student, bukan User
+     */
     public function evaluatee()
     {
-        return $this->belongsTo(User::class, 'evaluatee_id');
+        return $this->belongsTo(Student::class, 'evaluatee_id');
     }
 
     // Relasi ke rincian nilai per kategori

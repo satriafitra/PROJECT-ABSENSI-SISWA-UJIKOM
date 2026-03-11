@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\JadwalGuruController;
 use App\Http\Controllers\Admin\ManualAttendanceController; // Tambahkan ini!
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Guru\RekapAbsensiController;
+use App\Http\Controllers\Guru\AssessmentController;
 use App\Http\Controllers\AdminController;
 
 /*
@@ -64,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
             Route::view('/absensi-manual', 'admin.manual')->name('manual');
 
             Route::get('/absensi-manual', [ManualAttendanceController::class, 'index'])->name('manual');
+            Route::post('/absensi-manual/{id}/verify', [ManualAttendanceController::class, 'verify'])->name('manual.verify');
 
             Route::get('/rekap-absensi', [DashboardController::class, 'rekapAbsensi'])->name('rekapabsensi');
 
@@ -108,6 +110,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/scan-qr/export', [ScanQrController::class, 'export'])->name('scan.export');
 
             Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])->name('rekap.absensi');
+
+            Route::resource('assessment', App\Http\Controllers\Guru\AssessmentController::class);
         });
 
     /*

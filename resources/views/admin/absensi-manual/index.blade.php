@@ -5,7 +5,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
             <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">
-                📁 Laporan Absensi Manual
+                📁 Laporan Absensi Manual 
             </h1>
             <p class="text-gray-500 mt-1">
                 Manajemen data siswa yang melakukan pelaporan <span class="text-orange-600 font-semibold">Sakit</span> atau <span class="text-blue-600 font-semibold">Izin</span>.

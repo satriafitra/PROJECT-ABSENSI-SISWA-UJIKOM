@@ -162,6 +162,13 @@
                 </a>
             </li>
 
+            <li>
+                <a href="{{ route('guru.assessment.index') }}" class="sidebar-item {{ request()->routeIs('guru.assessment.*') ? 'active' : '' }}">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                    Penilaian Siswa
+                </a>
+            </li>
+
             @endif
 
         </ul>

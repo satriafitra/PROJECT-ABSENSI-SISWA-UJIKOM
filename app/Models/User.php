@@ -14,20 +14,16 @@ class User extends Authenticatable
 
     /**
      * The attributes that are mass assignable.
-     *
-     * @var list<string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role', // ⬅️ WAJIB (admin | guru)
+        'role', // (admin | guru | siswa)
     ];
 
     /**
      * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -36,8 +32,6 @@ class User extends Authenticatable
 
     /**
      * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
      */
     protected function casts(): array
     {
@@ -45,5 +39,27 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELASI TAMBAHAN UNTUK PENILAIAN
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Relasi: Siswa menerima banyak penilaian
+     */
+    public function assessments_received()
+    {
+        return $this->hasMany(Assessment::class, 'evaluatee_id');
+    }
+
+    /**
+     * Relasi: Guru memberikan banyak penilaian
+     */
+    public function assessments_given()
+    {
+        return $this->hasMany(Assessment::class, 'evaluator_id');
     }
 }

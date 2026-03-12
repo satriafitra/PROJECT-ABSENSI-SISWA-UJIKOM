@@ -91,6 +91,14 @@
                 </a>
             </li>
 
+            <li>
+                <a href="{{ route('admin.total_penilaian') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.total_penilaian') ? 'active' : '' }}">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    <span>Total Penilaian Siswa</span>
+                </a>
+            </li>
+
             <div class="menu-label">Master Data</div>
 
             <li>

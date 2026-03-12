@@ -63,6 +63,8 @@ Route::middleware(['auth'])->group(function () {
             // Master Data
             Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
             Route::view('/absensi-manual', 'admin.manual')->name('manual');
+            // Di dalam Route::middleware('can:isAdmin')->prefix('admin')...
+            Route::get('/total-penilaian', [DashboardController::class, 'totalPenilaian'])->name('total_penilaian');
 
             Route::get('/absensi-manual', [ManualAttendanceController::class, 'index'])->name('manual');
             Route::post('/absensi-manual/{id}/verify', [ManualAttendanceController::class, 'verify'])->name('manual.verify');

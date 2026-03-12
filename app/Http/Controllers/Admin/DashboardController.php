@@ -9,6 +9,7 @@ use App\Models\Classes;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -67,7 +68,7 @@ class DashboardController extends Controller
     {
         // 1. Mengambil filter tanggal dari input, default adalah hari ini
         $date = $request->input('date', Carbon::today()->format('Y-m-d'));
-        
+
         // 2. Mengambil input pencarian nama siswa
         $search = $request->input('search');
 
@@ -75,8 +76,8 @@ class DashboardController extends Controller
         // Menggunakan eager loading 'student.class' dan 'guru' agar performa ringan
         $attendances = Attendance::with(['student.class', 'guru'])
             ->whereDate('date', $date)
-            ->when($search, function($query) use ($search) {
-                $query->whereHas('student', function($q) use ($search) {
+            ->when($search, function ($query) use ($search) {
+                $query->whereHas('student', function ($q) use ($search) {
                     $q->where('name', 'like', '%' . $search . '%');
                 });
             })
@@ -84,5 +85,36 @@ class DashboardController extends Controller
             ->paginate(10);
 
         return view('admin.rekapabsensi', compact('attendances', 'date'));
+    }
+
+    public function totalPenilaian()
+    {
+        // 1. Ambil data kategori dan rata-rata skor global untuk chart
+        $categoryData = DB::table('assessment_categories')
+            ->leftJoin('assessment_details', 'assessment_categories.id', '=', 'assessment_details.category_id')
+            ->select(
+                'assessment_categories.name',
+                DB::raw('COALESCE(AVG(assessment_details.score), 0) as average_score')
+            )
+            ->groupBy('assessment_categories.id', 'assessment_categories.name')
+            ->get();
+
+        $chartLabels = $categoryData->pluck('name')->toArray();
+        $chartScores = $categoryData->pluck('average_score')->map(function ($score) {
+            return round($score, 1);
+        })->toArray();
+
+        // 2. Data Siswa untuk tabel di bawah (sama seperti sebelumnya)
+        $students = Student::has('assessments_received')
+            ->with(['class', 'assessments_received.details'])
+            ->get()
+            ->map(function ($student) {
+                $lastAssessment = $student->assessments_received->last();
+                $student->avg_score = $lastAssessment ? $lastAssessment->details->avg('score') : 0;
+                $student->last_period = $lastAssessment->period ?? '-';
+                return $student;
+            })->sortByDesc('avg_score');
+
+        return view('admin.total_penilaian', compact('students', 'chartLabels', 'chartScores'));
     }
 }

@@ -22,7 +22,7 @@ use App\Http\Controllers\AdminController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 /*
@@ -90,6 +90,18 @@ Route::middleware(['auth'])->group(function () {
             Route::get('jadwal/{id}/edit', [JadwalGuruController::class, 'edit'])->name('jadwal.edit');
             Route::put('jadwal/{id}', [JadwalGuruController::class, 'update'])->name('jadwal.update');
             Route::delete('jadwal/{id}', [JadwalGuruController::class, 'destroy'])->name('jadwal.destroy');
+
+            Route::resource('assessment-category', App\Http\Controllers\Admin\AssessmentCategoryController::class);
+
+            // Route khusus Kelola Pertanyaan (Indikator) manual
+            Route::get('assessment-category/{id}/questions', [App\Http\Controllers\Admin\AssessmentCategoryController::class, 'manageQuestions'])
+                ->name('assessment-category.questions');
+
+            Route::post('assessment-category/{id}/questions', [App\Http\Controllers\Admin\AssessmentCategoryController::class, 'storeQuestion'])
+                ->name('assessment-category.questions.store');
+
+            Route::delete('questions/{id}', [App\Http\Controllers\Admin\AssessmentCategoryController::class, 'destroyQuestion'])
+                ->name('questions.destroy');
         });
 
     /*
@@ -112,6 +124,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/rekap-absensi', [RekapAbsensiController::class, 'index'])->name('rekap.absensi');
 
             Route::resource('assessment', App\Http\Controllers\Guru\AssessmentController::class);
+            // Route di web.php untuk Guru
+            Route::post('/assessment/store', [AssessmentController::class, 'store']);
         });
 
     /*

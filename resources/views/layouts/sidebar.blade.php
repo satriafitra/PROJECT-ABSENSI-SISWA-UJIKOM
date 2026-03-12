@@ -133,6 +133,14 @@
                 </a>
             </li>
 
+            <li>
+                <a href="{{ route('admin.assessment-category.index') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.assessment-category.*') || request()->routeIs('admin.questions.*') ? 'active' : '' }}">
+                    <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    <span>Kategori Penilaian</span>
+                </a>
+            </li>
+
             @endif
 
             {{-- GURU MENU --}}

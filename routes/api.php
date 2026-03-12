@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Api\JadwalGuruApiController;
+use App\Http\Controllers\Api\StudentAssessmentController;
 
 // =====================
 // API SISWA
@@ -42,6 +43,9 @@ Route::get('/attendance/{student_id}', [AttendanceController::class, 'history'])
 
 Route::post('/absen', [ScanQrController::class, 'absen']);
 Route::post('/absen-manual', [AttendanceController::class, 'storeManual']);
+
+// Route di api.php untuk Flutter Siswa
+Route::get('/student/assessment/{id}', [StudentAssessmentController::class, 'getLatest']);
 
 
 // =====================

@@ -7,153 +7,130 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <style>
-    /* Styling Dasar & Font */
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     :root {
         --primary-orange: #f97316;
-        --soft-orange: #fff7ed;
         --slate-900: #0f172a;
     }
 
-    /* Override Select2 - Modern Design */
+    body { font-family: 'Plus_Jakarta_Sans', sans-serif; }
+
+    /* Modern Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+    /* Likert Circle Styling */
+    .likert-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    .likert-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .likert-circle {
+        width: 14px;
+        height: 14px;
+        border: 3px solid #e2e8f0;
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: white;
+    }
+
+    /* Ukuran Bergradasi sesuai saran: Bulat Gede -> Kecil -> Gede */
+    .size-1 { width: 32px; height: 32px; } /* Sangat Buruk */
+    .size-2 { width: 22px; height: 22px; } /* Buruk */
+    .size-3 { width: 16px; height: 16px; } /* Cukup */
+    .size-4 { width: 22px; height: 22px; } /* Baik */
+    .size-5 { width: 32px; height: 32px; } /* Sangat Baik */
+
+    .likert-item input:checked + .likert-circle.color-1 { background: #ef4444; border-color: #fca5a5; transform: scale(1.1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+    .likert-item input:checked + .likert-circle.color-2 { background: #f59e0b; border-color: #fcd34d; transform: scale(1.1); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+    .likert-item input:checked + .likert-circle.color-3 { background: #94a3b8; border-color: #cbd5e1; transform: scale(1.1); box-shadow: 0 0 15px rgba(148, 163, 184, 0.4); }
+    .likert-item input:checked + .likert-circle.color-4 { background: #f97316; border-color: #fdba74; transform: scale(1.1); box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+    .likert-item input:checked + .likert-circle.color-5 { background: #10b981; border-color: #6ee7b7; transform: scale(1.1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+
+    .category-card { 
+        display: none; 
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+    .category-card.active {
+        display: flex;
+        flex-direction: column;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Select2 Styling */
     .select2-container--default .select2-selection--single, 
     .select2-container--default .select2-selection--multiple {
         border: 2px solid #f1f5f9 !important;
         border-radius: 1.25rem !important;
         min-height: 54px !important;
-        padding: 8px 15px !important;
         background-color: #f8fafc !important;
-        transition: all 0.3s ease;
-    }
-
-    .select2-container--default.select2-container--focus .select2-selection--multiple,
-    .select2-container--default.select2-container--focus .select2-selection--single {
-        border-color: var(--primary-orange) !important;
-        background-color: #fff !important;
-        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1) !important;
-    }
-
-    .select2-container--default .select2-selection--multiple .select2-selection__choice {
-        background-color: var(--slate-900) !important;
-        border: none !important;
-        color: white !important;
-        border-radius: 0.75rem !important;
-        padding: 4px 12px !important;
-        margin-top: 4px !important;
-        font-weight: 600;
-        font-size: 0.75rem;
-    }
-
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-        color: #fca5a5 !important;
-        margin-right: 8px !important;
-    }
-
-    /* Custom Slider Thumb */
-    input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 22px;
-        width: 22px;
-        border-radius: 50%;
-        background: var(--primary-orange);
-        cursor: pointer;
-        border: 4px solid white;
-        box-shadow: 0 4px 10px rgba(249, 115, 22, 0.4);
-    }
-
-    /* Category Card Animation */
-    .category-card { 
-        display: none; 
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .category-card.active {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    /* Badge Label */
-    .badge-category {
-        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
     }
 </style>
 
-<div class="min-h-screen bg-[#f8fafc] py-10 px-4 font-['Plus_Jakarta_Sans']">
-    <div class="w-full max-w-5xl mx-auto">
+<div class="min-h-screen bg-[#f8fafc] py-10 px-4">
+    <div class="w-full max-w-6xl mx-auto">
         
-        {{-- Tombol Kembali --}}
-        <div class="mb-8">
-            <a href="{{ route('guru.assessment.index') }}" class="inline-flex items-center text-slate-400 hover:text-orange-600 transition-all font-bold group text-[11px] uppercase tracking-[0.2em]">
-                <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mr-3 group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors">
+        <div class="mb-8 flex justify-between items-center">
+            <a href="{{ route('guru.assessment.index') }}" class="inline-flex items-center text-slate-400 hover:text-orange-600 transition-all font-bold group text-[11px] uppercase tracking-widest">
+                <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mr-3">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 </div>
-                Kembali ke Dashboard
+                Kembali
             </a>
         </div>
 
         <form action="{{ route('guru.assessment.store') }}" method="POST" id="assessmentForm">
             @csrf
-            
-            <div class="bg-white rounded-[3rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden transition-all duration-500">
+            <div class="bg-white rounded-[3rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden">
                 
-                {{-- Header Section --}}
-                <div class="bg-slate-900 p-10 relative overflow-hidden">
-                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                {{-- Header --}}
+                <div class="bg-slate-900 p-10 relative">
+                    <div class="relative z-10 flex justify-between items-center">
                         <div>
-                            <span class="inline-block px-4 py-1.5 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-black uppercase tracking-widest mb-4">
-                                Form Penilaian Karakter
-                            </span>
-                            <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center">
-                                Input Evaluasi Siswa
-                            </h2>
-                            <p class="text-slate-400 mt-2 font-medium">Berikan penilaian objektif berdasarkan perilaku harian siswa.</p>
+                            <span class="inline-block px-4 py-1.5 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-black uppercase tracking-widest mb-4">Assessment System v2</span>
+                            <h2 class="text-4xl font-black text-white tracking-tight tracking-tighter">Evaluasi Karakter <span class="text-orange-500">Siswa</span></h2>
                         </div>
-                        <div class="hidden md:block">
-                            <div class="w-20 h-20 bg-orange-500 rounded-3xl rotate-12 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                                <i data-lucide="star" class="w-10 h-10 text-white -rotate-12 fill-white"></i>
-                            </div>
-                        </div>
+                        <i data-lucide="clipboard-check" class="w-16 h-16 text-slate-800"></i>
                     </div>
-                    {{-- Decorative Background --}}
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                 </div>
 
                 <div class="p-8 md:p-12 space-y-10">
-                    
-                    {{-- Seleksi Utama --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
-                        
-                        {{-- Siswa --}}
+                    {{-- Input Area --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50 p-8 rounded-[2.5rem]">
                         <div class="lg:col-span-4 space-y-3">
-                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1 flex items-center">
-                                <i data-lucide="users" class="w-4 h-4 mr-2 text-orange-500"></i> Pilih Nama Siswa
-                            </label>
+                            <label class="text-[11px] font-bold text-slate-500 uppercase ml-1">Pilih Siswa</label>
                             <select name="evaluatee_id" class="select2-search w-full" required>
-                                <option value="">Cari Siswa...</option>
+                                <option value="">Cari Nama...</option>
                                 @foreach($students as $student)
                                     <option value="{{ $student->id }}">{{ $student->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-
-                        {{-- Periode --}}
                         <div class="lg:col-span-3 space-y-3">
-                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1 flex items-center">
-                                <i data-lucide="calendar" class="w-4 h-4 mr-2 text-orange-500"></i> Periode Akademik
-                            </label>
-                            <select name="period" class="w-full bg-[#f8fafc] border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-slate-700 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm h-[54px]">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase ml-1">Periode</label>
+                            <select name="period" class="w-full bg-white border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm h-[54px]">
                                 <option value="Semester Genap 2026">Semester Genap 2026</option>
                             </select>
                         </div>
-
-                        {{-- Kategori Multiple --}}
                         <div class="lg:col-span-5 space-y-3">
-                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1 flex items-center">
-                                <i data-lucide="layers" class="w-4 h-4 mr-2 text-orange-500"></i> Kategori yang Dinilai
-                            </label>
+                            <label class="text-[11px] font-bold text-slate-500 uppercase ml-1">Kategori Penilaian</label>
                             <select id="categorySelector" class="select2-category w-full" multiple="multiple">
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -163,87 +140,97 @@
                     </div>
 
                     {{-- Empty State --}}
-                    <div id="empty-state" class="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem] transition-all">
-                        <div class="relative inline-block mb-6">
-                            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
-                                <i data-lucide="mouse-pointer-click" class="w-10 h-10 text-slate-300"></i>
-                            </div>
-                            <div class="absolute -top-2 -right-2 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center animate-bounce">
-                                <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
-                            </div>
-                        </div>
-                        <h3 class="text-slate-800 text-xl font-black">Mulai Penilaian</h3>
-                        <p class="text-slate-400 mt-2 max-w-sm mx-auto font-medium">Silahkan pilih siswa dan kategori penilaian di atas untuk menampilkan indikator evaluasi.</p>
+                    <div id="empty-state" class="py-20 text-center border-4 border-dashed border-slate-50 rounded-[3rem]">
+                        <i data-lucide="layers" class="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                        <p class="text-slate-400 font-bold">Pilih kategori untuk memulai penilaian</p>
                     </div>
 
-                    {{-- Indikator Container --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="indicators-container">
+                    {{-- Main Assessment Area --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="indicators-container">
                         @foreach($categories as $category)
-                        <div id="card-{{ $category->id }}" class="category-card bg-white rounded-[2rem] p-8 border-2 border-slate-100 hover:border-orange-200 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-orange-500/5">
-                            <div class="flex justify-between items-start mb-8">
-                                <div class="space-y-1">
-                                    <h4 class="font-black text-slate-900 text-xl tracking-tight leading-tight">{{ $category->name }}</h4>
-                                    <div class="flex items-center">
-                                        <span class="w-2 h-2 rounded-full bg-orange-500 mr-2"></span>
-                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Performance Score</span>
-                                    </div>
+                        <div id="card-{{ $category->id }}" class="category-card bg-white rounded-[2.5rem] border-2 border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                            {{-- Card Header --}}
+                            <div class="p-8 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-black text-slate-900 text-2xl tracking-tight">{{ $category->name }}</h4>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total Indikator: {{ $category->questions->count() }}</p>
                                 </div>
-                                <div class="flex flex-col items-end gap-2">
-                                    <div id="avg-{{ $category->id }}" class="bg-slate-100 text-slate-700 text-2xl font-black w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-500 shadow-inner">
-                                        0
-                                    </div>
-                                    <div id="icon-container-{{ $category->id }}" class="flex items-center gap-1.5 text-slate-300">
-                                        <i data-lucide="meh" id="icon-{{ $category->id }}" class="w-4 h-4"></i>
-                                        <span class="text-[9px] font-black uppercase tracking-tighter" id="label-{{ $category->id }}">N/A</span>
+                                <div class="text-right flex flex-col items-end">
+                                    <div id="avg-{{ $category->id }}" class="text-3xl font-black text-slate-300 mb-1">0</div>
+                                    <div class="flex items-center gap-2" id="status-container-{{ $category->id }}">
+                                        <i data-lucide="minus" id="icon-{{ $category->id }}" class="w-4 h-4 text-slate-300"></i>
+                                        <span class="text-[10px] font-black text-slate-300 uppercase" id="label-{{ $category->id }}">Belum Dinilai</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="space-y-8">
+                            {{-- Questions Area (SCROLLABLE) --}}
+                            <div class="p-8 space-y-10 max-h-[500px] overflow-y-auto custom-scroll">
                                 @forelse($category->questions as $question)
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center px-1">
-                                        <p class="text-sm font-bold text-slate-600 max-w-[80%] leading-relaxed">{{ $question->question_text }}</p>
-                                        <span class="text-lg font-black text-orange-500 bg-orange-50 px-3 py-1 rounded-xl" id="val-q-{{ $question->id }}">0</span>
-                                    </div>
-                                    <div class="relative flex items-center group">
-                                        <input type="range" 
-                                               name="scores[{{ $question->id }}]" 
-                                               min="0" max="100" step="1" value="0" 
-                                               data-category="{{ $category->id }}"
-                                               oninput="updateSingleScore(this, '{{ $question->id }}', '{{ $category->id }}')"
-                                               class="w-full h-2 bg-slate-100 rounded-full appearance-none cursor-pointer accent-orange-500 transition-all">
+                                <div class="space-y-6 pb-6 border-b border-slate-50 last:border-0">
+                                    <p class="text-sm font-extrabold text-slate-700 leading-relaxed">{{ $question->question_text }}</p>
+                                    
+                                    <div class="likert-container">
+                                        {{-- Sangat Buruk (20) --}}
+                                        <label class="likert-item">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="20" class="hidden" 
+                                                   onclick="updateScore('{{ $category->id }}', '{{ $question->id }}', 20)">
+                                            <div class="likert-circle size-1 color-1"></div>
+                                            <span class="text-[8px] font-black text-slate-400 uppercase">Sangat Buruk</span>
+                                        </label>
+
+                                        {{-- Buruk (40) --}}
+                                        <label class="likert-item">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="40" class="hidden"
+                                                   onclick="updateScore('{{ $category->id }}', '{{ $question->id }}', 40)">
+                                            <div class="likert-circle size-2 color-2"></div>
+                                            <span class="text-[8px] font-black text-slate-400 uppercase text-center">Buruk</span>
+                                        </label>
+
+                                        {{-- Cukup (60) --}}
+                                        <label class="likert-item">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="60" class="hidden"
+                                                   onclick="updateScore('{{ $category->id }}', '{{ $question->id }}', 60)">
+                                            <div class="likert-circle size-3 color-3"></div>
+                                            <span class="text-[8px] font-black text-slate-400 uppercase">Cukup</span>
+                                        </label>
+
+                                        {{-- Baik (80) --}}
+                                        <label class="likert-item">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="80" class="hidden"
+                                                   onclick="updateScore('{{ $category->id }}', '{{ $question->id }}', 80)">
+                                            <div class="likert-circle size-4 color-4"></div>
+                                            <span class="text-[8px] font-black text-slate-400 uppercase">Baik</span>
+                                        </label>
+
+                                        {{-- Sangat Baik (100) --}}
+                                        <label class="likert-item">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="100" class="hidden"
+                                                   onclick="updateScore('{{ $category->id }}', '{{ $question->id }}', 100)">
+                                            <div class="likert-circle size-5 color-5"></div>
+                                            <span class="text-[8px] font-black text-slate-400 uppercase">Sangat Baik</span>
+                                        </label>
                                     </div>
                                 </div>
                                 @empty
-                                <div class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                    <p class="text-slate-400 text-xs italic font-medium">Belum ada indikator tersedia.</p>
-                                </div>
+                                <p class="text-slate-400 text-center italic">Tidak ada pertanyaan.</p>
                                 @endforelse
                             </div>
                         </div>
                         @endforeach
                     </div>
 
-                    {{-- Footer Section --}}
-                    <div id="footer-section" class="space-y-8 pt-6" style="display: none;">
-                        <div class="space-y-4">
-                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1 flex items-center">
-                                <i data-lucide="message-circle" class="w-4 h-4 mr-2 text-orange-500"></i> Catatan Evaluasi Akhir
-                            </label>
-                            <textarea name="general_notes" class="w-full bg-[#f8fafc] border-2 border-slate-100 rounded-[1.5rem] px-8 py-6 focus:border-orange-500 focus:bg-white outline-none transition-all font-semibold text-slate-700 text-sm shadow-inner" rows="4" placeholder="Berikan feedback positif atau hal yang perlu ditingkatkan oleh siswa..."></textarea>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-5">
-                            <button type="submit" class="flex-[3] bg-slate-900 hover:bg-orange-600 text-white font-black py-6 rounded-2xl shadow-2xl shadow-slate-300 hover:shadow-orange-500/40 transition-all duration-300 flex justify-center items-center uppercase tracking-[0.2em] text-[11px] group">
-                                <i data-lucide="save" class="w-5 h-5 mr-3 group-hover:scale-125 transition-transform"></i> Finalisasi & Simpan Nilai
+                    {{-- Footer --}}
+                    <div id="footer-section" class="pt-10 space-y-6" style="display: none;">
+                        <textarea name="general_notes" class="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-8 focus:bg-white focus:border-orange-500 outline-none transition-all font-bold text-slate-700" rows="3" placeholder="Tambahkan catatan untuk siswa..."></textarea>
+                        
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <button type="submit" class="flex-[3] bg-slate-900 hover:bg-orange-600 text-white font-black py-7 rounded-2xl transition-all uppercase tracking-widest text-xs flex justify-center items-center gap-3">
+                                <i data-lucide="save"></i> Simpan Penilaian Siswa
                             </button>
-                            <a href="{{ route('guru.assessment.index') }}" class="flex-1 py-6 bg-white text-slate-400 border-2 border-slate-100 font-bold rounded-2xl hover:bg-slate-50 hover:text-slate-600 transition-all text-center uppercase tracking-widest text-[11px] flex items-center justify-center">
-                                Batalkan
-                            </a>
+                            <button type="button" onclick="location.reload()" class="flex-1 bg-white text-slate-400 border-2 border-slate-100 py-7 rounded-2xl font-black uppercase text-[10px] tracking-widest">Reset Form</button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </form>
@@ -251,38 +238,37 @@
 </div>
 
 <script>
-    function updateSingleScore(el, qId, catId) {
-        // 1. Update text per pertanyaan
-        document.getElementById('val-q-' + qId).innerText = el.value;
+    function updateScore(catId, qId, value) {
+        // Ambil semua input yang sudah terisi di kategori ini
+        const card = document.getElementById(`card-${catId}`);
+        const selectedInputs = card.querySelectorAll('input[type="radio"]:checked');
+        const totalQuestions = card.querySelectorAll('.likert-container').length;
 
-        // 2. Kalkulasi Rata-rata
-        const allInCat = document.querySelectorAll(`input[data-category="${catId}"]`);
-        let total = 0;
-        allInCat.forEach(input => total += parseInt(input.value));
-        const average = Math.round(total / allInCat.length);
-        
-        // 3. UI Update Kategori Card
-        const avgBox = document.getElementById('avg-' + catId);
+        let sum = 0;
+        selectedInputs.forEach(input => sum += parseInt(input.value));
+        const average = Math.round(sum / selectedInputs.length);
+
+        // Update UI
+        const avgDisplay = document.getElementById('avg-' + catId);
         const icon = document.getElementById('icon-' + catId);
         const label = document.getElementById('label-' + catId);
-        
-        avgBox.innerText = average;
-        
-        let config = { icon: 'meh', color: '#94a3b8', label: 'CUKUP' };
+        const container = document.getElementById('status-container-' + catId);
 
-        if (average <= 20) config = { icon: 'frown', color: '#ef4444', label: 'BURUK' };
-        else if (average <= 45) config = { icon: 'meh', color: '#f59e0b', label: 'KURANG' };
+        avgDisplay.innerText = average;
+        avgDisplay.classList.remove('text-slate-300');
+        avgDisplay.classList.add('text-slate-900');
+
+        let config = { icon: 'meh', color: '#f59e0b', label: 'CUKUP' };
+        if (average <= 25) config = { icon: 'frown', color: '#ef4444', label: 'BURUK' };
+        else if (average <= 50) config = { icon: 'meh', color: '#f59e0b', label: 'KURANG' };
         else if (average <= 75) config = { icon: 'smile', color: '#f97316', label: 'BAIK' };
         else if (average <= 90) config = { icon: 'laugh', color: '#10b981', label: 'HEBAT' };
         else config = { icon: 'award', color: '#6366f1', label: 'TELADAN' };
 
-        avgBox.style.backgroundColor = config.color;
-        avgBox.style.color = "#ffffff";
-        avgBox.style.boxShadow = `0 10px 20px -5px ${config.color}66`;
-        
         icon.setAttribute('data-lucide', config.icon);
-        icon.parentElement.style.color = config.color;
+        icon.style.color = config.color;
         label.innerText = config.label;
+        label.style.color = config.color;
         
         lucide.createIcons();
     }
@@ -290,32 +276,23 @@
     $(document).ready(function() {
         lucide.createIcons();
 
-        $('.select2-search').select2({ placeholder: "Cari Siswa..." });
-        
-        $('.select2-category').select2({
-            placeholder: "Pilih Kategori Penilaian",
-            allowClear: true,
-            closeOnSelect: false
-        });
+        $('.select2-search').select2({ placeholder: "Pilih Siswa" });
+        $('.select2-category').select2({ placeholder: "Pilih Kategori", closeOnSelect: false });
 
-        // Toggle Tampilan Berdasarkan Pilihan Kategori
         $('#categorySelector').on('change', function() {
             const selected = $(this).val() || [];
-            
             $('.category-card').removeClass('active');
             
             if (selected.length > 0) {
-                $('#empty-state').fadeOut(300, function() {
-                    $('#footer-section').fadeIn();
-                    selected.forEach(id => {
-                        $(`#card-${id}`).addClass('active');
-                    });
+                $('#empty-state').hide();
+                $('#footer-section').show();
+                selected.forEach(id => {
+                    $(`#card-${id}`).addClass('active');
                 });
             } else {
-                $('#footer-section').fadeOut();
-                $('#empty-state').fadeIn();
+                $('#empty-state').show();
+                $('#footer-section').hide();
             }
-            lucide.createIcons();
         });
     });
 </script>

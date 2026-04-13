@@ -60,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
             // Dashboard
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+            Route::resource('guru', GuruController::class);
+            // Tambahkan ini:
+            Route::get('guru/{id}/login-as', [GuruController::class, 'loginAs'])->name('guru.login-as');
+
             // Master Data
             Route::view('/tahun-ajar', 'admin.tahunajar')->name('tahunajar');
             Route::view('/absensi-manual', 'admin.manual')->name('manual');

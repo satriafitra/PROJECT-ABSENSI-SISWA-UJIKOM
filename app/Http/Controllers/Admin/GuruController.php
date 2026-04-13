@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Guru;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash; // Digunakan untuk mengenkripsi password agar aman
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth; // Digunakan untuk mengenkripsi password agar aman
 
 class GuruController extends Controller
 {
@@ -20,15 +21,34 @@ class GuruController extends Controller
 
         // 2. Query ke database dengan kondisi opsional
         $gurus = Guru::when($search, function ($query) use ($search) {
-                // JIKA ada input search, cari nama yang mirip (%keyword%)
-                $query->where('nama', 'like', "%{$search}%");
-            })
+            // JIKA ada input search, cari nama yang mirip (%keyword%)
+            $query->where('nama', 'like', "%{$search}%");
+        })
             ->orderBy('nama') // Urutkan alfabetis A-Z
             ->paginate(10)    // Batasi 10 data per halaman (Pagination)
             ->withQueryString(); // Menjaga parameter search tetap ada saat klik halaman 2, 3, dst.
 
         // 3. Lempar data ke view guru index
         return view('admin.guru.index', compact('gurus', 'search'));
+    }
+
+    public function loginAs($id)
+    {
+        // 1. Cari data guru
+        $guru = Guru::findOrFail($id);
+
+        // 2. Cari akun di tabel 'users' yang emailnya sama dengan guru tersebut
+        $user = User::where('email', $guru->email)->first();
+
+        if (!$user) {
+            return redirect()->back()->with('error', 'Akun user untuk guru ini tidak ditemukan.');
+        }
+
+        // 3. Loginkan admin sebagai user tersebut
+        Auth::loginUsingId($user->id);
+
+        // 4. Redirect ke dashboard guru
+        return redirect()->route('guru.dashboard')->with('success', 'Anda sekarang login sebagai ' . $guru->nama);
     }
 
     /**
@@ -59,7 +79,7 @@ class GuruController extends Controller
             'email'    => $request->email,
             'nip'      => $request->nip,
             'status'   => $request->status,
-            'password' => Hash::make($request->password), 
+            'password' => Hash::make($request->password),
         ]);
 
         // --- TAHAP 3: SIMPAN KE TABEL USERS ---

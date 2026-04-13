@@ -22,7 +22,6 @@
         </a>
     </div>
 
-    <!-- SEARCH NAMA GURU -->
     <div class="mb-6">
         <form method="GET" action="{{ route('admin.guru.index') }}">
             <div class="flex items-center gap-3 max-w-md">
@@ -60,6 +59,19 @@
     </script>
     @endif
 
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ups!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#ef4444'
+            });
+        });
+    </script>
+    @endif
+
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -69,8 +81,7 @@
                         <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">Informasi Guru</th>
                         <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">NIP</th>
                         <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                        <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">Akses</th>
-                        <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider text-center">Aksi</th>
+                        <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider text-center">Aksi Admin</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -105,19 +116,16 @@
                             </span>
                             @endif
                         </td>
-                        <td class="p-5">
-                            @if($guru->password)
-                            <div class="flex items-center gap-1 text-xs text-green-600 font-semibold">
-                                <i class="fas fa-check-circle"></i> Password Set
-                            </div>
-                            @else
-                            <div class="flex items-center gap-1 text-xs text-gray-400 font-semibold">
-                                <i class="fas fa-times-circle"></i> Belum Set
-                            </div>
-                            @endif
-                        </td>
                         <td class="p-5 text-center">
                             <div class="flex justify-center items-center gap-2">
+                                {{-- BUTTON LOGIN AS (IMPERSONATE) --}}
+                                <a href="{{ route('admin.guru.login-as', $guru->id) }}"
+                                    class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all duration-200 group"
+                                    title="Login Sebagai {{ $guru->nama }}"
+                                    onclick="return confirm('Apakah Anda yakin ingin login langsung sebagai {{ $guru->nama }}?')">
+                                    <i class="fas fa-user-shield group-hover:scale-110 transition-transform"></i>
+                                </a>
+
                                 <a href="{{ route('admin.guru.edit', $guru->id) }}"
                                     class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200"
                                     title="Edit Data">
@@ -141,7 +149,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="p-12 text-center">
+                        <td colspan="5" class="p-12 text-center">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-folder-open text-gray-300 text-5xl mb-3"></i>
                                 <p class="text-gray-500 text-lg font-medium">Belum ada data guru terdaftar</p>
@@ -151,7 +159,6 @@
                     @endforelse
                 </tbody>
             </table>
-            <!-- PAGINATION -->
             <div class="px-6 py-4 border-t border-gray-100">
                 {{ $gurus->links('vendor.pagination.tailwind') }}
             </div>
@@ -174,8 +181,7 @@
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Ya, Hapus Sekarang',
             cancelButtonText: 'Batal',
-            border: 'none',
-            borderRadius: '1.5rem'
+            borderRadius: '1rem'
         }).then((result) => {
             if (result.isConfirmed) {
                 form.submit();

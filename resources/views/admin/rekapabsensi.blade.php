@@ -183,6 +183,10 @@
                             <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100">
                                 Izin
                             </span>
+                            @elseif($status == 'telat')
+                            <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100">
+                                telat
+                            </span>
                             @elseif($status == 'sakit')
                             <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100">
                                 Sakit

@@ -15,7 +15,6 @@ class AssessmentController extends Controller
 {
     public function index()
     {
-        // Menampilkan siswa yang sudah memiliki penilaian
         $students = Student::has('assessments_received')
             ->with(['class', 'assessments_received.details'])
             ->get()

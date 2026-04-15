@@ -397,7 +397,7 @@
         updateMap(lat, lng, radius, nama, true);
     }
 
-    // Klik manual di Peta
+    // Klik manual di Peta 
     map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(8);
         var lng = e.latlng.lng.toFixed(8);

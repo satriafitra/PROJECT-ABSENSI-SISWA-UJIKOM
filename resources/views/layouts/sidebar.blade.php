@@ -148,6 +148,20 @@
                     <span>Kategori Penilaian</span>
                 </a>
             </li>
+            
+            <li>
+                <a href="{{ route('admin.gamifikasi.index') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.gamifikasi.*') ? 'active' : '' }}">
+                    <i data-lucide="zap" class="w-5 h-5"></i> <span>Gamifikasi</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ route('admin.siswa-shop.index') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.siswa-shop.*') ? 'active' : '' }}">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i> <span>Siswa Point</span>
+                </a>
+            </li>
 
             @endif
 

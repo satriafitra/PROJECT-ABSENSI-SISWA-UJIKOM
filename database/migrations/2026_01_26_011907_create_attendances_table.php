@@ -14,10 +14,19 @@ return new class extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('guru_id')->constrained('guru')->cascadeOnDelete(); // Pastikan ini ada
             $table->date('date');
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
-            $table->enum('status', ['hadir', 'telat', 'alfa'])->default('hadir');
+
+            // Tambahkan dua baris ini di file migration kamu
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+
+            $table->enum('status', ['hadir', 'telat', 'alfa', 'sakit', 'izin'])->default('hadir');
+            $table->string('keterangan')->nullable();
+            $table->string('image')->nullable();
+            $table->enum('is_verified', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

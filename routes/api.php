@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Api\JadwalGuruApiController;
 use App\Http\Controllers\Api\StudentAssessmentController;
+use App\Http\Controllers\Admin\LokasiController; // Jika ingin pakai controller yang sama
 
 // =====================
 // API SISWA
@@ -35,6 +36,14 @@ Route::get('/guru', function () {
         'status' => 'success',
         'total'  => $gurus->count(),
         'data'   => $gurus
+    ]);
+});
+
+
+Route::get('/lokasi-aktif', function() {
+    return response()->json([
+        'status' => true,
+        'data' => \App\Models\Lokasi::first() // Mengambil lokasi utama (misal SMKN 1)
     ]);
 });
 

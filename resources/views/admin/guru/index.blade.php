@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="p-8 bg-gray-50 min-h-screen">
+    {{-- HEADER SECTION --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <div>
             <h1 class="text-4xl font-extrabold text-gray-800 flex items-center gap-3">
@@ -22,6 +23,7 @@
         </a>
     </div>
 
+    {{-- SEARCH BAR --}}
     <div class="mb-6">
         <form method="GET" action="{{ route('admin.guru.index') }}">
             <div class="flex items-center gap-3 max-w-md">
@@ -32,46 +34,18 @@
                         name="search"
                         value="{{ request('search') }}"
                         placeholder="Cari nama guru..."
-                        class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                        class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all">
                 </div>
-
                 <button
                     type="submit"
-                    class="px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow">
+                    class="px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow-md transition-all">
                     Cari
                 </button>
             </div>
         </form>
     </div>
 
-
-    @if(session('success'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                confirmButtonColor: '#f97316',
-                timer: 3000
-            });
-        });
-    </script>
-    @endif
-
-    @if(session('error'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Ups!',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#ef4444'
-            });
-        });
-    </script>
-    @endif
-
+    {{-- TABLE SECTION --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -81,17 +55,18 @@
                         <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">Informasi Guru</th>
                         <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">NIP</th>
                         <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                        <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider text-center">Aksi Admin</th>
+                        <th class="p-5 text-sm font-bold text-gray-600 uppercase tracking-wider text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($gurus as $guru)
                     <tr class="hover:bg-orange-50/50 transition-colors duration-200">
-                        <td class="p-5 text-gray-500 font-medium">{{ $gurus->firstItem() + $loop->index }}
+                        <td class="p-5 text-gray-500 font-medium">
+                            {{ $gurus->firstItem() + $loop->index }}
                         </td>
                         <td class="p-5">
                             <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
+                                <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold shadow-sm">
                                     {{ strtoupper(substr($guru->nama, 0, 1)) }}
                                 </div>
                                 <div>
@@ -119,19 +94,21 @@
                         <td class="p-5 text-center">
                             <div class="flex justify-center items-center gap-2">
                                 {{-- BUTTON LOGIN AS (IMPERSONATE) --}}
-                                <a href="{{ route('admin.guru.login-as', $guru->id) }}"
+                                <button type="button"
+                                    onclick="confirmLoginAs('{{ route('admin.guru.login-as', $guru->id) }}', '{{ $guru->nama }}')"
                                     class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all duration-200 group"
-                                    title="Login Sebagai {{ $guru->nama }}"
-                                    onclick="return confirm('Apakah Anda yakin ingin login langsung sebagai {{ $guru->nama }}?')">
+                                    title="Login Sebagai {{ $guru->nama }}">
                                     <i class="fas fa-user-shield group-hover:scale-110 transition-transform"></i>
-                                </a>
+                                </button>
 
+                                {{-- BUTTON EDIT --}}
                                 <a href="{{ route('admin.guru.edit', $guru->id) }}"
                                     class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200"
                                     title="Edit Data">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
+                                {{-- BUTTON DELETE --}}
                                 <form action="{{ route('admin.guru.destroy', $guru->id) }}"
                                     method="POST"
                                     class="inline"
@@ -159,6 +136,8 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- PAGINATION --}}
             <div class="px-6 py-4 border-t border-gray-100">
                 {{ $gurus->links('vendor.pagination.tailwind') }}
             </div>
@@ -168,6 +147,39 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Konfirmasi Login Sebagai Guru
+    function confirmLoginAs(url, namaGuru) {
+        Swal.fire({
+            title: 'Konfirmasi Login',
+            html: `Apakah Anda yakin ingin login langsung sebagai <br><b>${namaGuru}</b>?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981', // Emerald 600
+            cancelButtonColor: '#6b7280', // Gray 500
+            confirmButtonText: '<i class="fas fa-sign-in-alt mr-2"></i> Ya, Login Sekarang',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            borderRadius: '1.25rem',
+            customClass: {
+                title: 'text-2xl font-bold text-gray-800',
+                confirmButton: 'px-6 py-3 rounded-xl font-semibold',
+                cancelButton: 'px-6 py-3 rounded-xl font-semibold'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Memproses Pengalihan...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                window.location.href = url;
+            }
+        });
+    }
+
+    // Konfirmasi Hapus Data
     function confirmDelete(event) {
         event.preventDefault();
         const form = event.target;
@@ -177,16 +189,39 @@
             text: "Tindakan ini tidak dapat dibatalkan!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444',
+            confirmButtonColor: '#ef4444', // Red 500
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Ya, Hapus Sekarang',
             cancelButtonText: 'Batal',
-            borderRadius: '1rem'
+            borderRadius: '1.25rem',
+            reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
                 form.submit();
             }
         });
     }
+
+    // Handle Session Flash Messages
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#f97316',
+                timer: 3000
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Ups!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#ef4444'
+            });
+        @endif
+    });
 </script>
 @endsection

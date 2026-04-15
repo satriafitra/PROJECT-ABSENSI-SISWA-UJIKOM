@@ -15,13 +15,14 @@ class Attendance extends Model
         'check_in',
         'check_out',
         'status',
+        'latitude',  // ⬅️ Tambahkan ini untuk GPS
+        'longitude', // ⬅️ Tambahkan ini untuk GPS
     ];
 
     // relasi ke siswa
     public function student()
     {
-        // Sesuaikan 'student_id' dengan nama kolom di tabel attendances
-        // dan 'id' dengan primary key di tabel students
+
         return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 

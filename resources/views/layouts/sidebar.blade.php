@@ -148,7 +148,7 @@
                     <span>Kategori Penilaian</span>
                 </a>
             </li>
-            
+
             <li>
                 <a href="{{ route('admin.gamifikasi.index') }}"
                     class="sidebar-item {{ request()->routeIs('admin.gamifikasi.*') ? 'active' : '' }}">

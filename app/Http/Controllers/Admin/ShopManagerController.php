@@ -3,61 +3,60 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\FlexibilityItem; // Sesuai Skema Database
-use App\Models\UserToken;      // Untuk melihat siapa saja yang punya token
+use App\Models\FlexibilityItem;
+use App\Models\UserToken;
 use Illuminate\Http\Request;
 
 class ShopManagerController extends Controller
 {
-    /**
-     * Menampilkan halaman Marketplace Manager
-     */
     public function index()
     {
-        // Mengambil semua item katalog
         $items = FlexibilityItem::latest()->get();
         
-        // Opsional: Mengambil data token yang sedang aktif digunakan siswa
-        $activeTokens = UserToken::with(['item', 'student'])
-            ->where('status', 'AVAILABLE')
-            ->latest()
-            ->paginate(10);
+        // Statistik untuk Dashboard Shop
+        $stats = [
+            'total_items'    => $items->count(),
+            'out_of_stock'   => $items->where('stock_limit', 0)->count(),
+            'total_redeemed' => UserToken::count(), // Total voucher yang sudah dibeli siswa
+        ];
 
-        return view('admin.siswa-shop.index', compact('items', 'activeTokens'));
+        return view('admin.siswa-shop.index', compact('items', 'stats'));
     }
 
-    /**
-     * Menyimpan item reward baru ke katalog (Requirement No. 3)
-     */
     public function store(Request $request)
     {
-        $request->validate([
-            'item_name' => 'required|string|max:255',
-            'point_cost' => 'required|integer|min:1',
+        $validData = $request->validate([
+            'item_name'   => 'required|string|max:255',
+            'category'    => 'required|string',
+            'point_cost'  => 'required|integer|min:1',
             'stock_limit' => 'nullable|integer',
+            'description' => 'nullable|string',
+            'icon'        => 'required|string',
         ]);
 
-        // Sesuai Tabel flexibility_items
-        FlexibilityItem::create([
-            'item_name' => $request->item_name,
-            'point_cost' => $request->point_cost,
-            'stock_limit' => $request->stock_limit,
-        ]);
+        FlexibilityItem::create($validData);
 
-        return back()->with('success', 'Item reward berhasil ditambahkan ke marketplace!');
+        return back()->with('success', 'Voucher berhasil dipublikasi ke marketplace!');
     }
 
-    /**
-     * Menghapus item dari katalog
-     */
-    public function destroy($id)
+    public function update(Request $request, $id)
     {
         $item = FlexibilityItem::findOrFail($id);
         
-        // Cek jika sudah ada siswa yang beli, sebaiknya jangan dihapus tapi di-nonaktifkan
-        // Namun untuk CRUD dasar, kita gunakan delete:
-        $item->delete();
+        $validData = $request->validate([
+            'item_name'   => 'required|string|max:255',
+            'point_cost'  => 'required|integer|min:1',
+            'stock_limit' => 'nullable|integer',
+        ]);
 
-        return back()->with('success', 'Item berhasil dihapus dari katalog.');
+        $item->update($validData);
+
+        return back()->with('success', 'Data voucher berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        FlexibilityItem::findOrFail($id)->delete();
+        return back()->with('success', 'Voucher telah dihapus dari katalog.');
     }
 }

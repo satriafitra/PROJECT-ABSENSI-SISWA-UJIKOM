@@ -6,5 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class FlexibilityItem extends Model
 {
-    protected $fillable = ['item_name', 'point_cost', 'stock_limit'];
+    protected $fillable = [
+        'item_name', 
+        'category', 
+        'description', 
+        'point_cost', 
+        'stock_limit', 
+        'icon', 
+        'is_active'
+    ];
 }

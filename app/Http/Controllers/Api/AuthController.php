@@ -53,6 +53,7 @@ class AuthController extends Controller
                 'class_id'  => $student->class_id,
                 'class'     => $student->class?->name,
                 'qr_token'  => $student->qr_token,
+                'points'    => $student->points, // 🔥 INI SOLUSINYA
             ],
         ], 200);
     }

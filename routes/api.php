@@ -10,7 +10,9 @@ use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Guru\ScanQrController;
 use App\Http\Controllers\Api\JadwalGuruApiController;
 use App\Http\Controllers\Api\StudentAssessmentController;
+use App\Http\Controllers\Api\ShopManagerController;
 use App\Http\Controllers\Admin\LokasiController; // Jika ingin pakai controller yang sama
+
 
 // =====================
 // API SISWA
@@ -73,6 +75,9 @@ Route::put('/jadwal-guru/{id}', [JadwalGuruApiController::class, 'update']);
 
 // Hapus jadwal guru
 Route::delete('/jadwal-guru/{id}', [JadwalGuruApiController::class, 'destroy']);
+
+Route::get('/marketplace', [ShopManagerController::class, 'apiIndex']);
+Route::post('/marketplace/redeem', [ShopManagerController::class, 'redeem']);
 
 // =====================
 // Debug QR Token Guru

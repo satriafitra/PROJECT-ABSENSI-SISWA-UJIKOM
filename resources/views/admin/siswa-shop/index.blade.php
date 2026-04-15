@@ -1,375 +1,383 @@
 @extends('layouts.admin')
 
 @section('content')
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
     :root {
-        --primary: #FF8C00;
-        --primary-hover: #e67e00;
+        --primary: #FF8C00; 
         --primary-soft: #fff7ed;
-        --background: #f8fafc;
-        --surface: #ffffff;
-        --border: #e2e8f0;
-        --text-main: #0f172a;
-        --text-muted: #64748b;
+        --secondary: #64748b;
+        --success: #10b981;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --bg-body: #f1f5f9;
+        --radius-card: 24px;
+        --radius-inner: 16px;
+        --shadow-lux: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
 
     body { 
-        font-family: 'Plus Jakarta Sans', sans-serif; 
-        background-color: var(--background);
-        color: var(--text-main);
+        font-family: 'Poppins', sans-serif; 
+        background-color: var(--bg-body); 
+        color: #1e293b;
+        line-height: 1.6;
     }
 
-    .content-wrapper {
-        padding: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
+    .content-wrapper { padding: 3rem; max-width: 1440px; margin: 0 auto; }
 
-    /* --- Header Section --- */
-    .page-header {
-        margin-bottom: 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .page-title {
-        font-weight: 800;
-        font-size: 1.75rem;
-        letter-spacing: -0.03em;
-        margin-bottom: 0.25rem;
-    }
-
-    /* --- Action Card (Compact Form) --- */
-    .action-card {
-        background: var(--surface);
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
-        padding: 1.5rem;
-        margin-bottom: 2.5rem;
-        position: relative;
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
-        gap: 1rem;
-        align-items: flex-end;
-    }
-
+    /* --- Luxury Input Design --- */
     .input-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group-custom label {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: var(--secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.6rem;
+        display: block;
+        padding-left: 4px;
+    }
+
+    .premium-input {
+        width: 100%;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: var(--radius-inner);
+        padding: 0.85rem 1.25rem;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #1e293b;
+    }
+
+    .premium-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--primary-soft);
+        transform: translateY(-1px);
+    }
+
+    /* --- Enhanced Voucher Design --- */
+    .voucher-card {
+        display: flex;
+        width: 100%;
+        max-width: 420px;
+        height: 160px;
+        filter: drop-shadow(0 20px 30px rgba(0,0,0,0.07));
+        transition: all 0.4s ease;
+    }
+
+    .voucher-card:hover { transform: translateY(-8px) rotate(1deg); }
+
+    .v-left {
+        flex: 2.2;
+        background: white;
+        border-radius: var(--radius-card) 0 0 var(--radius-card);
+        padding: 1.75rem;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        justify-content: space-between;
+        position: relative;
+        /* Sobekan Voucher Kiri */
+        clip-path: polygon(0 0, 100% 0, 100% 35%, 94% 42%, 94% 58%, 100% 65%, 100% 100%, 0 100%);
     }
 
-    .input-label-mini {
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .custom-input {
-        background: #fcfcfd;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 0.65rem 1rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.2s;
-        width: 100%;
-    }
-
-    .custom-input:focus {
-        border-color: var(--primary);
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.1);
-        outline: none;
-    }
-
-    .btn-submit {
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 0 1.5rem;
-        font-weight: 700;
-        font-size: 0.85rem;
-        height: 42px;
-        transition: all 0.2s;
+    .v-right {
+        flex: 1;
+        border-radius: 0 var(--radius-card) var(--radius-card) 0;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        color: white;
+        position: relative;
+        /* Sobekan Voucher Kanan */
+        clip-path: polygon(0 0, 0 35%, 6% 42%, 6% 58%, 0 65%, 0 100%, 100% 100%, 100% 0);
     }
 
-    .btn-submit:hover {
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
-    }
+    .v-bg-reward { background: linear-gradient(135deg, #FF8C00, #FFA500); }
+    .v-bg-izin { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+    .v-bg-fasilitas { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 
-    /* --- Table Styling (Modern & Clean) --- */
-    .table-container {
-        background: var(--surface);
-        border-radius: 24px;
-        border: 1px solid var(--border);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-        overflow: hidden;
-    }
-
-    .custom-table {
+    /* --- Table Styling (Floating Card Style) --- */
+    .table-container { margin-top: 4rem; }
+    
+    .table-luxury {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0;
+        border-spacing: 0 1.25rem;
     }
 
-    .custom-table thead th {
-        background: #f8fafc;
-        padding: 1.25rem 1.5rem;
-        font-size: 0.75rem;
+    .table-luxury thead th {
+        padding: 0 1.5rem;
+        color: var(--secondary);
         font-weight: 700;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-muted);
-        border-bottom: 1px solid var(--border);
-        text-align: left;
+        border: none;
     }
 
-    .custom-table tbody tr {
-        transition: background 0.2s;
-    }
-
-    .custom-table tbody tr:hover {
-        background: #fafafa;
-    }
-
-    .custom-table tbody td {
-        padding: 1.25rem 1.5rem;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
-        color: var(--text-main);
-        font-size: 0.9rem;
-    }
-
-    /* Column Specific Styles */
-    .item-display {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .icon-wrapper {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        background: var(--primary-soft);
-        color: var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .item-name {
-        font-weight: 700;
-        display: block;
-        margin-bottom: 0.1rem;
-    }
-
-    .item-desc {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        display: block;
-    }
-
-    /* Status Badges */
-    .badge-pill {
-        padding: 6px 14px;
-        border-radius: 99px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .bg-indigo-soft { background: #eef2ff; color: #4338ca; }
-    .bg-orange-soft { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-    .bg-green-soft { background: #f0fdf4; color: #15803d; }
-    .bg-red-soft { background: #fef2f2; color: #b91c1c; }
-
-    .action-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--border);
+    .table-luxury tbody tr {
         background: white;
-        color: var(--text-muted);
+        border-radius: var(--radius-inner);
+        box-shadow: var(--shadow-lux);
+        transition: all 0.3s ease;
+    }
+
+    .table-luxury tbody tr:hover {
+        transform: scale(1.01);
+    }
+
+    .table-luxury td {
+        padding: 1.5rem;
+        border: none;
+        vertical-align: middle;
+    }
+
+    .table-luxury td:first-child { border-radius: var(--radius-inner) 0 0 var(--radius-inner); }
+    .table-luxury td:last-child { border-radius: 0 var(--radius-inner) var(--radius-inner) 0; }
+
+    /* --- Action Buttons --- */
+    .action-btn-group {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
         transition: all 0.2s;
-        cursor: pointer;
+        border: none;
+        text-decoration: none;
     }
 
-    .action-btn:hover {
-        background: #fff1f2;
-        color: #e11d48;
-        border-color: #fda4af;
-        transform: scale(1.05);
+    .btn-edit { background: #eff6ff; color: #2563eb; }
+    .btn-edit:hover { background: #2563eb; color: white; }
+
+    .btn-delete { background: #fef2f2; color: #dc2626; }
+    .btn-delete:hover { background: #dc2626; color: white; }
+
+    /* --- Other UI Elements --- */
+    .glass-card {
+        background: white;
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-lux);
     }
 
-    /* Responsive */
-    @media (max-width: 1200px) {
-        .form-grid {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
+    .btn-save {
+        background: var(--primary);
+        color: white;
+        font-weight: 700;
+        border: none;
+        border-radius: var(--radius-inner);
+        padding: 1.1rem;
+        width: 100%;
+        margin-top: 1rem;
+        box-shadow: 0 10px 20px -5px rgba(255, 140, 0, 0.4);
+        transition: all 0.3s;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px -5px rgba(255, 140, 0, 0.5);
     }
 </style>
 
 <div class="content-wrapper">
-    <header class="page-header">
-        <div>
-            <h1 class="page-title">Inventory Voucher</h1>
-            <p class="text-muted">Kelola katalog item penukaran poin siswa secara real-time.</p>
-        </div>
-        <div class="badge-pill bg-indigo-soft">
-            <i data-lucide="layers" size="14"></i>
-            {{ $items->count() }} Total Item
-        </div>
+    <header class="mb-5">
+        <h1 style="font-weight: 800; font-size: 2.25rem; color: #0f172a; margin-bottom: 0.5rem;">Inventory Voucher 🎫</h1>
+        <p class="text-muted fw-500">Kustomisasi item penukaran poin AkvaScan dengan tampilan mewah.</p>
     </header>
 
-    <div class="action-card">
-        <form action="{{ route('admin.siswa-shop.store') }}" method="POST">
-            @csrf
-            <div class="form-grid">
-                <div class="input-group-custom">
-                    <label class="input-label-mini">Nama Item</label>
-                    <input type="text" name="item_name" class="custom-input" placeholder="Contoh: Tiket Kantin" required>
+    <div class="row g-5"> <div class="col-lg-5">
+            <div class="d-flex flex-column align-items-center justify-content-center h-100" 
+                 style="background: rgba(255,255,255,0.4); border: 2px dashed #cbd5e1; border-radius: var(--radius-card); padding: 3rem;">
+                <span class="small fw-800 text-muted mb-5" style="letter-spacing: 2px;">LIVE PREVIEW MODE</span>
+                
+                <div id="voucher-preview" class="voucher-card">
+                    <div class="v-left">
+                        <div>
+                            <span class="badge mb-2" id="preview-category" 
+                                  style="background: var(--primary-soft); color: var(--primary); font-weight: 800; font-size: 0.65rem; padding: 6px 12px; border-radius: 50px;">REWARD</span>
+                            <h4 class="fw-800 mb-1" id="preview-name" style="color: #0f172a;">Nama Voucher</h4>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="padding: 8px; background: #f8fafc; border-radius: 10px;">
+                                <i id="preview-icon" data-lucide="ticket" class="text-primary" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <span class="small text-muted fw-500" id="preview-desc">Tulis deskripsi menarik di sini...</span>
+                        </div>
+                    </div>
+                    <div class="v-right v-bg-reward" id="preview-right-bg">
+                        <span style="font-size: 0.6rem; font-weight: 600; opacity: 0.8; letter-spacing: 1px;">POINT COST</span>
+                        <h2 class="fw-800 mb-0" id="preview-points" style="font-size: 2.2rem;">0</h2>
+                        <span style="font-size: 0.75rem; font-weight: 700;">PTS</span>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="input-group-custom">
-                    <label class="input-label-mini">Kategori</label>
-                    <select name="category" class="custom-input">
-                        <option value="Izin">Izin</option>
-                        <option value="Reward" selected>Reward</option>
-                        <option value="Fasilitas">Fasilitas</option>
-                    </select>
-                </div>
-
-                <div class="input-group-custom">
-                    <label class="input-label-mini">Icon</label>
-                    <select name="icon" class="custom-input">
-                        <option value="ticket">Ticket</option>
-                        <option value="gift">Gift</option>
-                        <option value="zap">Fast Pass</option>
-                        <option value="coffee">Food</option>
-                    </select>
-                </div>
-
-                <div class="input-group-custom">
-                    <label class="input-label-mini">Poin</label>
-                    <input type="number" name="point_cost" class="custom-input" placeholder="0" required>
-                </div>
-
-                <div class="input-group-custom">
-                    <label class="input-label-mini">Stok</label>
-                    <input type="number" name="stock_limit" class="custom-input" placeholder="∞">
-                </div>
-
-                <div class="input-group-custom">
-                    <button type="submit" class="btn-submit">
-                        <i data-lucide="plus-circle" size="18"></i>
-                        Tambah
+        <div class="col-lg-7">
+            <div class="glass-card">
+                <form action="{{ route('admin.siswa-shop.store') }}" method="POST">
+                    @csrf
+                    <div class="row g-4"> <div class="col-md-8">
+                            <div class="input-group-custom">
+                                <label>Nama Item</label>
+                                <input type="text" name="item_name" id="in-name" class="premium-input" placeholder="Voucher Makan Siang..." required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group-custom">
+                                <label>Kategori</label>
+                                <select name="category" id="in-category" class="premium-input">
+                                    <option value="Reward">Reward</option>
+                                    <option value="Izin">Izin</option>
+                                    <option value="Fasilitas">Fasilitas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group-custom">
+                                <label>Harga Poin</label>
+                                <div class="position-relative">
+                                    <input type="number" name="point_cost" id="in-points" class="premium-input" placeholder="Contoh: 500" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group-custom">
+                                <label>Stok Maksimal</label>
+                                <input type="number" name="stock_limit" class="premium-input" placeholder="Ketik 0 jika tak terbatas">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="input-group-custom">
+                                <label>Deskripsi Manfaat</label>
+                                <textarea name="description" id="in-desc" class="premium-input" rows="2" placeholder="Jelaskan apa yang didapatkan siswa..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save">
+                        <i data-lucide="sparkles" style="width: 18px; margin-right: 8px; vertical-align: middle;"></i> Simpan Voucher Baru
                     </button>
-                </div>
+                </form>
             </div>
-            
-            <div class="input-group-custom mt-3">
-                <label class="input-label-mini">Deskripsi</label>
-                <input type="text" name="description" class="custom-input" placeholder="Jelaskan detail item di sini...">
-            </div>
-        </form>
+        </div>
     </div>
 
     <div class="table-container">
-        <table class="custom-table">
-            <thead>
-                <tr>
-                    <th style="width: 40%">Detail Item</th>
-                    <th>Kategori</th>
-                    <th>Harga Tukar</th>
-                    <th>Ketersediaan</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($items as $item)
-                <tr>
-                    <td>
-                        <div class="item-display">
-                            <div class="icon-wrapper">
-                                <i data-lucide="{{ $item->icon }}" size="20"></i>
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+            <h3 class="fw-800 m-0" style="font-size: 1.5rem;">Katalog Voucher</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-luxury">
+                <thead>
+                    <tr>
+                        <th>Visual Item</th>
+                        <th>Info Stok</th>
+                        <th class="text-center">Nilai Tukar</th>
+                        <th class="text-end">Aksi Pengelolaan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($items as $item)
+                    <tr>
+                        <td width="380px">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="voucher-card" style="height: 90px; width: 220px; font-size: 0.7rem; filter: none;">
+                                    <div class="v-left p-2 px-3" style="border: 1px solid #f1f5f9; border-right: none;">
+                                        <div class="fw-800 text-dark text-truncate">{{ $item->item_name }}</div>
+                                        <div class="text-muted" style="font-size: 0.6rem;">{{ $item->category }}</div>
+                                    </div>
+                                    <div class="v-right {{ $item->category == 'Reward' ? 'v-bg-reward' : ($item->category == 'Izin' ? 'v-bg-izin' : 'v-bg-fasilitas') }}">
+                                        <div class="fw-800" style="font-size: 1rem;">{{ $item->point_cost }}</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <span class="item-name">{{ $item->item_name }}</span>
-                                <span class="item-desc">{{ Str::limit($item->description, 50) }}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge-pill bg-indigo-soft">{{ $item->category }}</span>
-                    </td>
-                    <td>
-                        <span class="badge-pill bg-orange-soft">
-                            <i data-lucide="database" size="12"></i>
-                            {{ number_format($item->point_cost) }} Poin
-                        </span>
-                    </td>
-                    <td>
-                        @if($item->stock_limit === null)
-                            <span class="text-muted fw-bold small" style="letter-spacing: 0.05em;">UNLIMITED</span>
-                        @elseif($item->stock_limit > 0)
-                            <span class="badge-pill bg-green-soft">
-                                <i data-lucide="check-circle" size="12"></i>
-                                {{ $item->stock_limit }} Stok
+                        </td>
+                        <td>
+                            @if($item->stock_limit === null || $item->stock_limit == 0)
+                                <div class="d-flex align-items-center gap-2 text-success fw-600">
+                                    <i data-lucide="infinity" size="16"></i> Unlimited
+                                </div>
+                            @else
+                                <div class="fw-600 {{ $item->stock_limit < 5 ? 'text-danger' : 'text-slate-700' }}">
+                                    {{ $item->stock_limit }} Tersedia
+                                </div>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark fw-800 p-2 px-3 rounded-pill" style="font-size: 0.8rem;">
+                                {{ number_format($item->point_cost) }} Poin
                             </span>
-                        @else
-                            <span class="badge-pill bg-red-soft">Habis</span>
-                        @endif
-                    </td>
-                    <td class="text-right">
-                        <form action="{{ route('admin.siswa-shop.destroy', $item->id) }}" method="POST">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="action-btn" onclick="return confirm('Hapus item ini?')">
-                                <i data-lucide="trash-2" size="16"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center py-5">
-                        <div class="text-muted">
-                            <i data-lucide="inbox" size="40" class="mb-2" style="opacity: 0.2;"></i>
-                            <p class="small">Belum ada item tersedia dalam katalog.</p>
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                        </td>
+                        <td>
+                            <div class="action-btn-group">
+                                <a href="#" class="btn-action btn-edit" title="Edit Data">
+                                    <i data-lucide="file-text" size="20"></i>
+                                </a>
+                                <form action="{{ route('admin.siswa-shop.destroy', $item->id) }}" method="POST">
+                                    @csrf @method('DELETE')
+                                    <button class="btn-action btn-delete" title="Hapus Permanen">
+                                        <i data-lucide="trash-2" size="20"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted fw-500">Katalog masih kosong, silakan tambah voucher baru.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // Inisialisasi icon lucide
+    // Real-time Live Preview Script
+    const inName = document.getElementById('in-name');
+    const inDesc = document.getElementById('in-desc');
+    const inPoints = document.getElementById('in-points');
+    const inCategory = document.getElementById('in-category');
+
+    const updatePreview = () => {
+        document.getElementById('preview-name').innerText = inName.value || "Nama Voucher";
+        document.getElementById('preview-desc').innerText = inDesc.value || "Tulis deskripsi menarik di sini...";
+        document.getElementById('preview-points').innerText = inPoints.value || "0";
+        document.getElementById('preview-category').innerText = inCategory.value.toUpperCase();
+        
+        const rightBg = document.getElementById('preview-right-bg');
+        rightBg.className = 'v-right'; // Reset classes
+        if(inCategory.value === 'Reward') rightBg.classList.add('v-bg-reward');
+        if(inCategory.value === 'Izin') rightBg.classList.add('v-bg-izin');
+        if(inCategory.value === 'Fasilitas') rightBg.classList.add('v-bg-fasilitas');
+
+        lucide.createIcons();
+    };
+
+    [inName, inDesc, inPoints, inCategory].forEach(el => {
+        el.addEventListener('input', updatePreview);
+    });
+
+    // Inisialisasi awal icon
     lucide.createIcons();
 </script>
 @endsection

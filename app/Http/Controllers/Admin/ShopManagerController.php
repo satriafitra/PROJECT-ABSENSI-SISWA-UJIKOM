@@ -64,6 +64,7 @@ class ShopManagerController extends Controller
         UserToken::create([
             'student_id' => $student->id,
             'item_id' => $item->id,
+            'status' => 'AVAILABLE'
         ]);
 
         return response()->json([

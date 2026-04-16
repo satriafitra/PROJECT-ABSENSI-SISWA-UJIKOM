@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ShopManagerController extends Controller
 {
-    // ================= GET MARKETPLACE =================
+    // ================= MARKETPLACE =================
     public function apiIndex()
     {
         $items = FlexibilityItem::latest()->get()->map(function ($item) {
@@ -20,14 +20,9 @@ class ShopManagerController extends Controller
                 'price' => $item->point_cost,
                 'category' => $item->category,
                 'description' => $item->description,
-
-                // ICON DARI CATEGORY
-                'icon' => match ($item->category) {
-                    'Reward' => 'gift',
-                    'Izin' => 'log-out',
-                    'Fasilitas' => 'bolt',
-                    default => 'ticket'
-                },
+                'theme' => strtolower($item->category),
+                'is_voucher' => (bool) $item->is_voucher,
+                'extra_minutes' => (int) $item->extra_minutes,
             ];
         });
 
@@ -37,7 +32,100 @@ class ShopManagerController extends Controller
         ]);
     }
 
-    // ================= REDEEM VOUCHER =================
+    // ================= MY VOUCHERS =================
+    public function myVouchers($student_id)
+    {
+        $tokens = UserToken::with('item')
+            ->where('student_id', $student_id)
+            ->latest()
+            ->get();
+
+        $data = $tokens->map(function ($t) {
+            return [
+                'id' => $t->id,
+                'name' => $t->item->item_name ?? '-',
+                'category' => $t->item->category ?? '-',
+                'description' => $t->item->description ?? '-',
+
+                // 🔥 INI YANG BENAR
+                'status' => $t->status,
+                'attendance_id' => $t->used_at_attendance_id,
+
+                'created_at' => optional($t->created_at)->format('d M Y'),
+
+                'points_spent' => (int) (
+                    $t->points_spent ??
+                    $t->item->point_cost ??
+                    0
+                ),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    // ================= POINT HISTORY =================
+    public function pointHistory($student_id)
+    {
+        $data = UserToken::with('item')
+            ->where('student_id', $student_id)
+            ->latest()
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'label' => $t->item->item_name ?? '-',
+                    'points' => $t->points_spent ?? $t->item->point_cost ?? 0,
+                    'date' => optional($t->created_at)->format('d M'),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    // ================= USE VOUCHER =================
+    public function useVoucher(Request $request)
+    {
+        $request->validate([
+            'voucher_id' => 'required|exists:user_tokens,id',
+            'student_id' => 'required|exists:students,id',
+        ]);
+
+        $voucher = UserToken::where('id', $request->voucher_id)
+            ->where('student_id', $request->student_id)
+            ->first();
+
+        if (!$voucher) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Voucher tidak ditemukan'
+            ]);
+        }
+
+        // 🔥 FIX: pakai status ENUM
+        if ($voucher->status !== 'AVAILABLE') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Voucher tidak tersedia'
+            ]);
+        }
+
+        $voucher->update([
+            'status' => 'USED'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => '1 token telah diaktifkan'
+        ]);
+    }
+
+    // ================= REDEEM =================
     public function redeem(Request $request)
     {
         $request->validate([
@@ -48,7 +136,7 @@ class ShopManagerController extends Controller
         $item = FlexibilityItem::findOrFail($request->item_id);
         $student = Student::findOrFail($request->student_id);
 
-        // ❌ CEK POIN
+        // cek poin
         if ($student->points < $item->point_cost) {
             return response()->json([
                 'success' => false,
@@ -56,7 +144,7 @@ class ShopManagerController extends Controller
             ]);
         }
 
-        // ❌ CEK STOK
+        // cek stok
         if ($item->stock_limit !== null && $item->stock_limit <= 0) {
             return response()->json([
                 'success' => false,
@@ -64,30 +152,27 @@ class ShopManagerController extends Controller
             ]);
         }
 
-        // ✅ KURANGI POIN
-        $student->points -= $item->point_cost;
-        $student->save();
+        // kurangi poin
+        $student->decrement('points', $item->point_cost);
 
-        // ✅ KURANGI STOK (jika ada limit)
+        // kurangi stok
         if ($item->stock_limit !== null) {
-            $item->stock_limit -= 1;
-            $item->save();
+            $item->decrement('stock_limit');
         }
 
-        // ✅ SIMPAN TRANSAKSI
+        // 🔥 FIX: simpan sesuai ENUM DB
         UserToken::create([
             'student_id' => $student->id,
             'item_id' => $item->id,
+            'points_spent' => $item->point_cost,
+            'status' => 'AVAILABLE',
+            'used_at_attendance_id' => null
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Voucher berhasil dibeli',
-            'points' => $student->points,
-            'item' => [
-                'id' => $item->id,
-                'name' => $item->item_name,
-            ]
+            'points' => $student->points
         ]);
     }
 }

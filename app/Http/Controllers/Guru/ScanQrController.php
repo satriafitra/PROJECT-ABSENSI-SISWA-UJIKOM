@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Guru;
 use App\Models\Attendance;
 use App\Models\JadwalGuru;
-use App\Models\PointLedger; // Import model Ledger Poin
+use App\Models\PointLedger;
+use App\Models\UserToken;
+use App\Models\Student;
 use Carbon\Carbon;
 
 class ScanQrController extends Controller
@@ -23,20 +25,18 @@ class ScanQrController extends Controller
 
         $guru = Guru::where('email', $user->email)->firstOrFail();
 
-        // Pastikan locale ke Indonesia
         config(['app.locale' => 'id']);
         Carbon::setLocale('id');
 
         $hariIni = Carbon::now('Asia/Jakarta')->translatedFormat('l');
 
-        // Mengambil jadwal hari ini
         $jadwalSekarang = JadwalGuru::where('guru_id', $guru->id)
             ->where('hari', $hariIni)
             ->get();
 
         $qrData = json_encode([
-            'type'       => 'attendance',
-            'qr_token'   => $guru->qr_token,
+            'type' => 'attendance',
+            'qr_token' => $guru->qr_token,
             'created_at' => Carbon::now('Asia/Jakarta')->toDateTimeString(),
         ]);
 
@@ -45,82 +45,122 @@ class ScanQrController extends Controller
 
     public function absen(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'student_id' => 'required|exists:students,id',
-            'qr_token'   => 'required|exists:guru,qr_token',
+            'qr_token' => 'required|exists:guru,qr_token',
             'created_at' => 'required'
         ]);
 
         $guru = Guru::where('qr_token', $request->qr_token)->firstOrFail();
+
         $now = Carbon::now('Asia/Jakarta');
         $today = $now->toDateString();
         $jamSekarang = $now->format('H:i:s');
 
         config(['app.locale' => 'id']);
         Carbon::setLocale('id');
+
         $dayName = $now->translatedFormat('l');
 
-        // 2. Logika Validasi Jadwal
+        // ================= JADWAL =================
+        $menitToleransi = 30;
+        $jamBatasToleransi = $now->copy()->subMinutes($menitToleransi)->format('H:i:s');
+
         $jadwal = JadwalGuru::where('guru_id', $guru->id)
             ->where('hari', $dayName)
             ->where('jam_mulai', '<=', $jamSekarang)
-            ->where('jam_selesai', '>=', $jamSekarang)
+            ->whereTime('jam_selesai', '>=', $jamBatasToleransi)
             ->first();
 
         if (!$jadwal) {
             return response()->json([
-                'status'  => false,
-                'message' => "QR Tidak Aktif. Saat ini bukan jam mengajar atau jadwal tidak ditemukan."
+                'status' => false,
+                'message' => 'QR Tidak Aktif. Batas toleransi telah berakhir.'
             ], 403);
         }
 
-        // 3. Cek apakah siswa sudah absen di MAPEL dan RENTANG JAM yang sama
-        $already = Attendance::where('student_id', $request->student_id)
-            ->where('guru_id', $guru->id)
-            ->where('date', $today)
-            ->whereBetween('check_in', [$jadwal->jam_mulai, $jadwal->jam_selesai])
-            ->exists();
+        // ================= TRANSAKSI =================
+        return DB::transaction(function () use (
+            $request,
+            $guru,
+            $now,
+            $today,
+            $jamSekarang,
+            $jadwal
+        ) {
 
-        if ($already) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Anda sudah melakukan absensi di mata pelajaran ' . $jadwal->mata_pelajaran
-            ], 409);
-        }
+            // 🔒 AMBIL VOUCHER AKTIF
+            $activeVoucher = UserToken::where('student_id', $request->student_id)
+                ->where('status', 'AVAILABLE')
+                ->whereNull('used_at_attendance_id')
+                ->lockForUpdate()
+                ->first();
 
-        // --- 4. PROSES SIMPAN ABSENSI & REWARD POIN (DATABASE TRANSACTION) ---
-        return DB::transaction(function () use ($request, $guru, $today, $jamSekarang, $jadwal) {
+            $isLate = $jamSekarang > $jadwal->jam_selesai;
 
-            // 1. Simpan Absensi
-            Attendance::create([
+            // ================= STATUS =================
+            // 🔥 voucher = ALWAYS HADIR
+            $statusAbsen = ($activeVoucher || !$isLate) ? 'hadir' : 'telat';
+
+            // ================= POINT FIX =================
+            if ($statusAbsen == 'hadir') {
+                $reward = 50;
+                $type = 'EARN';
+                $desc = "Reward Absensi: " . $jadwal->mata_pelajaran;
+
+                $student = Student::findOrFail($request->student_id);
+                $student->increment('points', $reward);
+            } else {
+                $reward = 5;
+                $type = 'PENALTY';
+                $desc = "Potongan Telat: " . $jadwal->mata_pelajaran;
+
+                $student = Student::findOrFail($request->student_id);
+                $student->decrement('points', $reward);
+            }
+
+            // ================= ATTENDANCE =================
+            $attendance = Attendance::create([
                 'student_id' => $request->student_id,
-                'guru_id'    => $guru->id,
-                'date'       => $today,
-                'check_in'   => $jamSekarang,
-                'status'     => 'hadir',
+                'guru_id' => $guru->id,
+                'date' => $today,
+                'check_in' => $jamSekarang,
+                'status' => $statusAbsen,
             ]);
 
-            // 2. Update Saldo Poin di Tabel Students
-            $rewardAmount = 5;
-            $student = \App\Models\Student::find($request->student_id);
-            $student->increment('points', $rewardAmount); // Ini yang bikin nambah di database!
-
-            // 3. Simpan Riwayat di PointLedger (Untuk Log)
+            // ================= LEDGER =================
             PointLedger::create([
-                'student_id'       => $request->student_id,
-                'transaction_type' => 'EARN',
-                'amount'           => $rewardAmount,
-                'current_balance'  => $student->points, // Ambil saldo terbaru setelah increment
-                'description'      => "Reward Absensi: " . $jadwal->mata_pelajaran
+                'student_id' => $request->student_id,
+                'transaction_type' => $type,
+                'amount' => $reward,
+                'current_balance' => $student->points,
+                'description' => $desc
             ]);
 
-            // 4. Response (Kirim total_poin_skrg ke Flutter)
+            // ================= VOUCHER USED =================
+            if ($activeVoucher) {
+                $activeVoucher->update([
+                    'status' => 'USED',
+                    'used_at_attendance_id' => $attendance->id
+                ]);
+            }
+
+            // ================= MESSAGE =================
+            $message = $statusAbsen == 'hadir'
+                ? "Berhasil Absen! Poin +$reward"
+                : "Absen Telat! Poin -$reward";
+
+            if ($activeVoucher) {
+                $message .= " (1 voucher telah digunakan)";
+            }
+
             return response()->json([
-                'status'  => true,
-                'message' => 'Berhasil Absen! Poin bertambah +5',
-                'detail'  => [
-                    'total_poin_skrg' => $student->points // Ini dikirim ke Flutter
+                'status' => true,
+                'message' => $message,
+                'detail' => [
+                    'status' => $statusAbsen,
+                    'total_poin_skrg' => $student->points,
+                    'voucher_used' => $activeVoucher ? true : false
                 ]
             ], 201);
         });

@@ -78,6 +78,8 @@ Route::delete('/jadwal-guru/{id}', [JadwalGuruApiController::class, 'destroy']);
 
 Route::get('/marketplace', [ShopManagerController::class, 'apiIndex']);
 Route::post('/marketplace/redeem', [ShopManagerController::class, 'redeem']);
+Route::get('/my-vouchers/{student_id}', [ShopManagerController::class, 'myVouchers']);
+Route::post('/use-voucher', [ShopManagerController::class, 'useVoucher']);
 
 // =====================
 // Debug QR Token Guru

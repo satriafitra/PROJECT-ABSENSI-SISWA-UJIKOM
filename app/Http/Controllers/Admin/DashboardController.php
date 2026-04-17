@@ -44,10 +44,10 @@ class DashboardController extends Controller
             ->count();
 
         // Logika Alpha: 
-        // Mengambil data yang statusnya 'alfa' di DB ATAU 
-        // Menghitung sisa siswa yang belum terekam di tabel attendance hari ini
-        $terabsen = Attendance::whereDate('date', $today)->count();
-        $alpha = max(0, $totalSiswa - $terabsen);
+        // Mengambil data yang statusnya 'alfa' di DB
+        $alpha = Attendance::whereDate('date', $today)
+            ->where('status', 'alfa')
+            ->count();
 
         return view('admin.dashboard', compact(
             'totalSiswa',

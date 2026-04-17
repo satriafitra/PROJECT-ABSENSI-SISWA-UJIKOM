@@ -18,6 +18,7 @@ class JadwalGuru extends Model
         'mata_pelajaran',
         'jam_mulai',
         'jam_selesai',
+        'batas_telat',
         'ruangan',
     ];
 

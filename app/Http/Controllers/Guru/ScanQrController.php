@@ -96,26 +96,55 @@ class ScanQrController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            $isLate = $jamSekarang > $jadwal->jam_selesai;
+            // Menentukan Batas Waktu Telat (sesuai setting jadwal)
+            $menitTelat = $jadwal->batas_telat ?? 5;
+            $jamMulai = Carbon::createFromFormat('H:i:s', $jadwal->jam_mulai, 'Asia/Jakarta');
+            $batasTelat = $jamMulai->copy()->addMinutes($menitTelat)->format('H:i:s');
+
+            if ($jamSekarang > $jadwal->jam_selesai) {
+                Attendance::create([
+                    'student_id' => $request->student_id,
+                    'guru_id' => $guru->id,
+                    'date' => $today,
+                    'check_in' => $jamSekarang,
+                    'status' => 'alfa',
+                ]);
+                
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Anda sudah melewati jam pelajaran',
+                    'detail' => [
+                        'status' => 'alfa',
+                        'total_poin_skrg' => Student::findOrFail($request->student_id)->points,
+                        'voucher_used' => false
+                    ]
+                ], 403);
+            } elseif ($jamSekarang > $batasTelat) {
+                $statusAbsen = 'telat';
+            } else {
+                $statusAbsen = 'hadir';
+            }
 
             // ================= STATUS =================
             // 🔥 voucher = ALWAYS HADIR
-            $statusAbsen = ($activeVoucher || !$isLate) ? 'hadir' : 'telat';
+            if ($activeVoucher) {
+                $statusAbsen = 'hadir';
+            }
 
             // ================= POINT FIX =================
+            $student = Student::findOrFail($request->student_id);
+
             if ($statusAbsen == 'hadir') {
                 $reward = 50;
                 $type = 'EARN';
                 $desc = "Reward Absensi: " . $jadwal->mata_pelajaran;
 
-                $student = Student::findOrFail($request->student_id);
                 $student->increment('points', $reward);
             } else {
                 $reward = 5;
                 $type = 'PENALTY';
                 $desc = "Potongan Telat: " . $jadwal->mata_pelajaran;
 
-                $student = Student::findOrFail($request->student_id);
                 $student->decrement('points', $reward);
             }
 
@@ -146,9 +175,11 @@ class ScanQrController extends Controller
             }
 
             // ================= MESSAGE =================
-            $message = $statusAbsen == 'hadir'
-                ? "Berhasil Absen! Poin +$reward"
-                : "Absen Telat! Poin -$reward";
+            if ($statusAbsen == 'hadir') {
+                $message = "Berhasil Absen! Poin +$reward";
+            } else {
+                $message = "Absen Telat! Poin -$reward";
+            }
 
             if ($activeVoucher) {
                 $message .= " (1 voucher telah digunakan)";

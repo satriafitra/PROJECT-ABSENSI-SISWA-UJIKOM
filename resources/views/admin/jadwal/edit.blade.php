@@ -97,7 +97,7 @@
                         <div class="p-2 bg-orange-500 rounded-xl shadow-lg shadow-orange-500/30">
                             <i data-lucide="plus-circle" class="w-6 h-6 text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-white tracking-tight">Buat Jadwal Baru</h2>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">Edit Jadwal Guru</h2>
                     </div>
                     <p class="text-slate-400">Atur alokasi waktu guru dan mata pelajaran dengan presisi.</p>
                 </div>
@@ -105,8 +105,9 @@
                 <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
             </div>
 
-            <form action="{{ route('admin.jadwal.store') }}" method="POST" class="p-8 lg:p-12 space-y-8">
+            <form action="{{ route('admin.jadwal.update', $jadwal->id) }}" method="POST" class="p-8 lg:p-12 space-y-8">
                 @csrf
+                @method('PUT')
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="md:col-span-2">
@@ -116,7 +117,7 @@
                         <select name="guru_id" class="select2-search w-full">
                             <option value="">-- Cari Nama Guru --</option>
                             @foreach($gurus as $guru)
-                                <option value="{{ $guru->id }}">{{ $guru->nama }}</option>
+                                <option value="{{ $guru->id }}" {{ $jadwal->guru_id == $guru->id ? 'selected' : '' }}>{{ $guru->nama }}</option>
                             @endforeach
                         </select>
                         @error('guru_id')<p class="text-red-500 text-xs mt-2 ml-1">{{ $message }}</p>@enderror
@@ -129,7 +130,7 @@
                         <select name="mata_pelajaran" class="select2-search w-full">
                             <option value="">-- Cari Mapel --</option>
                             @foreach(App\Enums\Mapel::all() as $mapel)
-                                <option value="{{ $mapel }}">{{ $mapel }}</option>
+                                <option value="{{ $mapel }}" {{ $jadwal->mata_pelajaran == $mapel ? 'selected' : '' }}>{{ $mapel }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -141,7 +142,7 @@
                         <select name="hari" class="select2-search w-full">
                             <option value="">-- Pilih Hari --</option>
                             @foreach(App\Enums\Hari::all() as $hari)
-                                <option value="{{ $hari }}">{{ $hari }}</option>
+                                <option value="{{ $hari }}" {{ $jadwal->hari == $hari ? 'selected' : '' }}>{{ $hari }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -157,7 +158,7 @@
                         <div class="group">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1 group-focus-within:text-orange-500 transition-colors">Waktu Mulai</label>
                             <div class="relative">
-                                <input type="time" name="jam_mulai" class="w-full bg-white border-2 border-slate-100 rounded-xl px-5 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all font-semibold text-slate-700">
+                                <input type="time" name="jam_mulai" value="{{ $jadwal->jam_mulai }}" class="w-full bg-white border-2 border-slate-100 rounded-xl px-5 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all font-semibold text-slate-700">
                                 <i data-lucide="play" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors"></i>
                             </div>
                         </div>
@@ -165,7 +166,7 @@
                         <div class="group">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1 group-focus-within:text-orange-500 transition-colors">Waktu Selesai</label>
                             <div class="relative">
-                                <input type="time" name="jam_selesai" class="w-full bg-white border-2 border-slate-100 rounded-xl px-5 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all font-semibold text-slate-700">
+                                <input type="time" name="jam_selesai" value="{{ $jadwal->jam_selesai }}" class="w-full bg-white border-2 border-slate-100 rounded-xl px-5 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all font-semibold text-slate-700">
                                 <i data-lucide="square" class="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300 group-focus-within:text-orange-500 transition-colors"></i>
                             </div>
                         </div>
@@ -173,7 +174,7 @@
                         <div class="group">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1 group-focus-within:text-orange-500 transition-colors">Batas Telat (Menit)</label>
                             <div class="relative">
-                                <input type="number" name="batas_telat" value="5" min="1" class="w-full bg-white border-2 border-slate-100 rounded-xl px-5 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all font-semibold text-slate-700">
+                                <input type="number" name="batas_telat" value="{{ $jadwal->batas_telat ?? 5 }}" min="1" class="w-full bg-white border-2 border-slate-100 rounded-xl px-5 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all font-semibold text-slate-700">
                                 <i data-lucide="clock" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors"></i>
                             </div>
                         </div>
@@ -184,7 +185,7 @@
                     <label class="flex items-center text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-3 ml-1">
                         <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-orange-500"></i> Ruangan / Kelas
                     </label>
-                    <input type="text" name="ruangan" 
+                    <input type="text" name="ruangan" value="{{ $jadwal->ruangan }}"
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700" 
                            placeholder="Misal: Laboratorium Fisika lt. 2">
                 </div>
@@ -192,7 +193,7 @@
                 <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
                     <button type="submit" class="w-full sm:flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-bold py-5 rounded-2xl shadow-xl shadow-orange-600/20 hover:shadow-orange-600/40 hover:-translate-y-1 transition-all active:scale-95 flex justify-center items-center">
                         <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>
-                        Simpan Jadwal Baru
+                        Simpan Perubahan
                     </button>
                     <a href="{{ route('admin.jadwal.index') }}" class="w-full sm:flex-1 py-5 px-6 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all text-center">
                         Batal

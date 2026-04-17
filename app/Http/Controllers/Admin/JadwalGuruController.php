@@ -54,6 +54,7 @@ class JadwalGuruController extends Controller
             'mata_pelajaran'  => 'required',
             'jam_mulai'       => 'required',
             'jam_selesai'     => 'required|after:jam_mulai',
+            'batas_telat'     => 'required|integer|min:1',
             'ruangan'         => 'nullable|string'
         ]);
 
@@ -80,6 +81,7 @@ class JadwalGuruController extends Controller
             'mata_pelajaran'  => 'required',
             'jam_mulai'       => 'required',
             'jam_selesai'     => 'required|after:jam_mulai',
+            'batas_telat'     => 'required|integer|min:1',
             'ruangan'         => 'nullable|string'
         ]);
 

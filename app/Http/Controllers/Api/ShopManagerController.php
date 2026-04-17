@@ -116,7 +116,7 @@ class ShopManagerController extends Controller
         }
 
         $voucher->update([
-            'status' => 'USED'
+            'status' => 'ACTIVE'
         ]);
 
         return response()->json([

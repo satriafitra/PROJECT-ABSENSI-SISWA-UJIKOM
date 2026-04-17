@@ -91,7 +91,7 @@ class ScanQrController extends Controller
 
             // 🔒 AMBIL VOUCHER AKTIF
             $activeVoucher = UserToken::where('student_id', $request->student_id)
-                ->where('status', 'AVAILABLE')
+                ->where('status', 'ACTIVE')
                 ->whereNull('used_at_attendance_id')
                 ->lockForUpdate()
                 ->first();

@@ -68,6 +68,7 @@
                         <th class="px-6 py-4">Waktu Laporan</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         <th class="px-6 py-4">Alasan / Keterangan</th>
+                        <th class="px-6 py-4 text-center">Bukti</th>
                         <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -116,6 +117,18 @@
                                 </p>
                             </div>
                         </td>
+                        <td class="px-6 py-4 text-center">
+                            @if($row->image)
+                                <a href="{{ asset('storage/' . $row->image) }}" target="_blank" class="inline-block relative group">
+                                    <img src="{{ asset('storage/' . $row->image) }}" alt="Bukti {{ $row->status }}" class="w-12 h-12 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:scale-105 transition-transform duration-200">
+                                    <div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-lg">
+                                        <i class="fas fa-search-plus text-white text-sm"></i>
+                                    </div>
+                                </a>
+                            @else
+                                <span class="text-xs text-gray-400 italic">Tidak ada</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end space-x-2">
                                 <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition shadow-sm" title="Lihat Detail">
@@ -133,7 +146,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-20 text-center">
+                        <td colspan="7" class="px-6 py-20 text-center">
                             <div class="flex flex-col items-center">
                                 <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                     <i class="fas fa-folder-open text-gray-200 text-3xl"></i>

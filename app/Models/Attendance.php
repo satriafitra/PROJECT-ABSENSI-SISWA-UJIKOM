@@ -14,9 +14,10 @@ class Attendance extends Model
         'keterangan', // Tambahkan ini jika belum ada!
         'check_in',
         'check_out',
-        'status',
         'latitude',  // ⬅️ Tambahkan ini untuk GPS
         'longitude', // ⬅️ Tambahkan ini untuk GPS
+        'image',
+        'is_verified',
     ];
 
     // relasi ke siswa

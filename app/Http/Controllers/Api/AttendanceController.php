@@ -137,11 +137,17 @@ class AttendanceController extends Controller
             ], 409);
         }
 
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('absensi_bukti', 'public');
+        }
+
         Attendance::create([
             'student_id' => $request->student_id,
             'date'       => $today,
             'status'     => $request->status,
             'keterangan' => $request->keterangan, // Pastikan kolom ini ada di database kamu
+            'image'      => $imagePath,
         ]);
 
         return response()->json([

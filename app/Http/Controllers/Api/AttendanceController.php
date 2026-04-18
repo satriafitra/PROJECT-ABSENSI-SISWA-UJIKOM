@@ -49,6 +49,14 @@ class AttendanceController extends Controller
         }
 
         $now   = Carbon::now();
+
+        if ($now->isWeekend()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Hari libur, tidak bisa absen hari ini.',
+            ], 403);
+        }
+
         $today = $now->toDateString();
         $time  = $now->format('H:i:s');
 
@@ -123,7 +131,15 @@ class AttendanceController extends Controller
             'keterangan' => 'required|string|max:255',
         ]);
 
-        $today = Carbon::now()->toDateString();
+        $now = Carbon::now();
+        if ($now->isWeekend()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Hari libur, tidak bisa mengirim laporan hari ini.',
+            ], 403);
+        }
+
+        $today = $now->toDateString();
 
         // Cek apakah sudah ada catatan (Hadir/Sakit/Izin) hari ini
         $alreadyExists = Attendance::where('student_id', $request->student_id)

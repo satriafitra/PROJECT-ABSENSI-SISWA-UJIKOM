@@ -5,292 +5,313 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-    :root {
-        --primary-orange: #f97316;
-        --slate-900: #0f172a;
-        --slate-50: #f8fafc;
-        --font-main: 'Poppins', sans-serif;
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Likert Scales */
+    .likert-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; gap: 10px; }
+    .likert-item { display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; flex: 1; transition: all 0.2s ease; }
+    .likert-circle { border: 3px solid #e2e8f0; border-radius: 50%; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: white; }
+    
+    .size-1 { width: 36px; height: 36px; } 
+    .size-2 { width: 28px; height: 28px; } 
+    .size-3 { width: 20px; height: 20px; } 
+    .size-4 { width: 28px; height: 28px; } 
+    .size-5 { width: 36px; height: 36px; } 
 
-    body { 
-        font-family: var(--font-main);
-        background-color: #f1f5f9;
-    }
+    .likert-item input:checked + .likert-circle.color-1 { background: #ef4444; border-color: #fee2e2; transform: scale(1.15); box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    .likert-item input:checked + .likert-circle.color-2 { background: #f59e0b; border-color: #fef3c7; transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+    .likert-item input:checked + .likert-circle.color-3 { background: #94a3b8; border-color: #f1f5f9; transform: scale(1.15); box-shadow: 0 0 20px rgba(148, 163, 184, 0.4); }
+    .likert-item input:checked + .likert-circle.color-4 { background: #f97316; border-color: #ffedd5; transform: scale(1.15); box-shadow: 0 0 20px rgba(249, 115, 22, 0.4); }
+    .likert-item input:checked + .likert-circle.color-5 { background: #10b981; border-color: #d1fae5; transform: scale(1.15); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
 
-    /* Override all text to Poppins */
-    .font-poppins { font-family: var(--font-main); }
+    .likert-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
+    .likert-item input:checked ~ .likert-label { color: #0f172a; }
 
-    /* Modern Scrollbar untuk Card Pertanyaan */
-    .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--primary-orange); }
+    /* Category Page Animation */
+    .category-page { display: none; opacity: 0; transform: translateY(15px); transition: all 0.4s ease; }
+    .category-page.active { display: block; opacity: 1; transform: translateY(0); }
 
-    /* Likert Circle Styling - Gradasi Ukuran */
-    .likert-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 0;
-        gap: 10px;
-    }
-
-    .likert-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        flex: 1;
-        transition: all 0.2s ease;
-    }
-
-    .likert-circle {
-        border: 3px solid #e2e8f0;
-        border-radius: 50%;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        background: white;
-        position: relative;
-    }
-
-    /* Ukuran Bergradasi: Gede -> Kecil -> Gede */
-    .size-1 { width: 34px; height: 34px; } /* Sangat Buruk (Gede) */
-    .size-2 { width: 24px; height: 24px; } /* Buruk (Sedang) */
-    .size-3 { width: 18px; height: 18px; } /* Cukup (Kecil) */
-    .size-4 { width: 24px; height: 24px; } /* Baik (Sedang) */
-    .size-5 { width: 34px; height: 34px; } /* Sangat Baik (Gede) */
-
-    /* Efek Saat Diklik (Checked) */
-    .likert-item input:checked + .likert-circle.color-1 { background: #ef4444; border-color: #fee2e2; transform: scale(1.15); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-    .likert-item input:checked + .likert-circle.color-2 { background: #f59e0b; border-color: #fef3c7; transform: scale(1.15); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
-    .likert-item input:checked + .likert-circle.color-3 { background: #94a3b8; border-color: #f1f5f9; transform: scale(1.15); box-shadow: 0 0 15px rgba(148, 163, 184, 0.4); }
-    .likert-item input:checked + .likert-circle.color-4 { background: #f97316; border-color: #ffedd5; transform: scale(1.15); box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
-    .likert-item input:checked + .likert-circle.color-5 { background: #10b981; border-color: #d1fae5; transform: scale(1.15); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
-
-    .likert-label {
-        font-size: 9px;
-        font-weight: 700;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        text-align: center;
-    }
-
-    .likert-item input:checked ~ .likert-label { color: var(--slate-900); }
-
-    /* Card Category Animation */
-    .category-card { 
-        display: none; 
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.5s ease;
-    }
-    .category-card.active {
-        display: flex;
-        flex-direction: column;
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    /* Select2 UI Refresh */
-    .select2-container--default .select2-selection--single, 
-    .select2-container--default .select2-selection--multiple {
-        border: 2px solid #f1f5f9 !important;
+    /* Sidebar Item */
+    .cat-tab { cursor: pointer; transition: all 0.3s ease; }
+    .cat-tab.active { background: white; border-color: #f97316; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+    .cat-tab.active .cat-icon { color: #f97316; background: #fff7ed; }
+    .cat-tab.active .cat-text { color: #f97316; font-weight: 800; }
+    
+    .select2-container--default .select2-selection--single {
+        border: 2px solid #e2e8f0 !important;
         border-radius: 1rem !important;
-        min-height: 54px !important;
-        font-family: var(--font-main);
-        background-color: white !important;
+        height: 54px !important;
+        display: flex;
+        align-items: center;
     }
 </style>
 
-<div class="min-h-screen py-10 px-4 font-poppins">
-    <div class="w-full max-w-6xl mx-auto">
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 font-jakarta">
+    <div class="max-w-7xl mx-auto">
         
-        {{-- Tombol Back --}}
-        <div class="mb-8">
-            <a href="{{ route('guru.assessment.index') }}" class="inline-flex items-center text-slate-500 hover:text-orange-600 transition-all font-bold group text-[11px] uppercase tracking-[0.2em]">
-                <div class="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center mr-3 group-hover:rotate-[-10deg] transition-transform">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                </div>
-                Kembali ke Dashboard
-            </a>
+        {{-- Header Section --}}
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+                <a href="{{ route('guru.assessment.index') }}" class="inline-flex items-center text-slate-400 hover:text-orange-500 font-bold text-xs uppercase tracking-widest mb-4 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali ke Riwayat
+                </a>
+                <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                    Penilaian <span class="text-orange-500">Siswa</span>
+                </h1>
+                <p class="text-slate-500 font-medium mt-2 text-lg">Halaman khusus evaluasi karakter dan sikap siswa secara detail.</p>
+            </div>
+            <div class="bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
+                <i data-lucide="calendar" class="text-orange-500 w-5 h-5"></i>
+                <span class="font-bold text-slate-700">Semester Genap 2026</span>
+            </div>
         </div>
 
         <form action="{{ route('guru.assessment.store') }}" method="POST" id="assessmentForm">
             @csrf
-            <div class="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/60 border border-white overflow-hidden">
+            
+            {{-- Form Target Siswa --}}
+            <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 mb-8 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
                 
-                {{-- Header Section --}}
-                <div class="bg-slate-900 p-10 relative overflow-hidden">
-                    <div class="relative z-10 flex justify-between items-center">
-                        <div>
-                            <div class="flex items-center gap-2 mb-4">
-                                <span class="px-3 py-1 rounded-lg bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest">E-Assessment</span>
-                                <span class="px-3 py-1 rounded-lg bg-white/10 text-slate-400 text-[10px] font-bold uppercase tracking-widest">v2.1.0</span>
+                <div class="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 flex-shrink-0">
+                    <i data-lucide="user-check" class="w-8 h-8"></i>
+                </div>
+                
+                <div class="flex-grow w-full md:w-auto">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-2">Pilih Siswa yang Akan Dinilai</label>
+                    <select name="evaluatee_id" class="select2-search w-full" required>
+                        <option value="">Cari Nama Siswa...</option>
+                        @foreach($students as $student)
+                            <option value="{{ $student->id }}">{{ $student->name }} - {{ $student->nis ?? 'NISN Kosong' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- Layout Utama: Sidebar & Area Soal --}}
+            <div class="flex flex-col lg:flex-row gap-8">
+                
+                {{-- Sidebar Kategori --}}
+                <div class="w-full lg:w-1/3 xl:w-1/4 flex-shrink-0">
+                    <div class="bg-slate-50 rounded-[2rem] p-4 border border-slate-200 sticky top-8">
+                        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-4 mb-4 mt-2">Daftar Kategori</h3>
+                        <div class="space-y-2">
+                            @foreach($categories as $index => $category)
+                            <div class="cat-tab p-4 rounded-2xl border-2 border-transparent flex items-center justify-between {{ $index == 0 ? 'active' : '' }}" onclick="switchCategory('{{ $category->id }}', this)">
+                                <div class="flex items-center gap-4">
+                                    <div class="cat-icon w-10 h-10 rounded-xl bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-colors">
+                                        {{ $index + 1 }}
+                                    </div>
+                                    <div class="cat-text font-bold text-slate-600 transition-colors">{{ $category->name }}</div>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
                             </div>
-                            <h2 class="text-3xl md:text-5xl font-black text-white tracking-tighter">
-                                Evaluasi <span class="text-orange-500 underline decoration-4 underline-offset-8">Karakter</span> Siswa
-                            </h2>
-                            <p class="text-slate-400 mt-4 font-medium text-sm">Input data penilaian perkembangan karakter objektif.</p>
-                        </div>
-                        <div class="hidden md:block">
-                            <i data-lucide="shield-check" class="w-20 h-20 text-white/5"></i>
+                            @endforeach
+                            <div class="cat-tab p-4 rounded-2xl border-2 border-transparent flex items-center justify-between" onclick="switchCategory('final', this)">
+                                <div class="flex items-center gap-4">
+                                    <div class="cat-icon w-10 h-10 rounded-xl bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-colors">
+                                        <i data-lucide="check" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="cat-text font-bold text-slate-600 transition-colors">Selesai</div>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="p-6 md:p-12 space-y-10">
-                    {{-- Form Filter Utama --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
-                        <div class="lg:col-span-4 space-y-3">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Nama Siswa</label>
-                            <select name="evaluatee_id" class="select2-search w-full" required>
-                                <option value="">Cari Siswa...</option>
-                                @foreach($students as $student)
-                                    <option value="{{ $student->id }}">{{ $student->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="lg:col-span-3 space-y-3">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Periode</label>
-                            <select name="period" class="w-full bg-white border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm h-[54px] outline-none focus:border-orange-500 transition-all">
-                                <option value="Semester Genap 2026">Semester Genap 2026</option>
-                            </select>
-                        </div>
-                        <div class="lg:col-span-5 space-y-3">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Kategori Pertanyaan</label>
-                            <select id="categorySelector" class="select2-category w-full" multiple="multiple">
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    {{-- Status Kosong --}}
-                    <div id="empty-state" class="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem] transition-all">
-                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i data-lucide="pencil-line" class="w-10 h-10 text-slate-300"></i>
-                        </div>
-                        <h3 class="text-slate-800 text-xl font-bold">Siap Menilai?</h3>
-                        <p class="text-slate-400 mt-2 font-medium">Pilih siswa dan kategori penilaian di atas.</p>
-                    </div>
-
-                    {{-- Container Card Pertanyaan --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="indicators-container">
-                        @foreach($categories as $category)
-                        <div id="card-{{ $category->id }}" class="category-card bg-white rounded-[2.5rem] border-2 border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                {{-- Area Soal (Halaman Sendiri) --}}
+                <div class="w-full lg:w-2/3 xl:w-3/4">
+                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 min-h-[600px] relative overflow-hidden">
+                        
+                        @foreach($categories as $index => $category)
+                        <div id="page-{{ $category->id }}" class="category-page {{ $index == 0 ? 'active' : '' }} p-8 md:p-12">
                             
-                            {{-- Header Card --}}
-                            <div class="p-8 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                            {{-- Header Halaman Kategori --}}
+                            <div class="border-b-2 border-slate-100 pb-8 mb-8 flex justify-between items-end">
                                 <div>
-                                    <h4 class="font-black text-slate-900 text-xl">{{ $category->name }}</h4>
-                                    <span class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Kategori Perilaku</span>
+                                    <span class="px-4 py-1.5 rounded-xl bg-orange-100 text-orange-600 text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Kategori {{ $index + 1 }}</span>
+                                    <h2 class="text-3xl md:text-4xl font-black text-slate-800">{{ $category->name }}</h2>
+                                    <p class="text-slate-500 font-medium mt-2">Berikan penilaian yang objektif berdasarkan pengamatan Anda.</p>
                                 </div>
-                                <div class="text-right flex flex-col items-end">
-                                    <div id="avg-{{ $category->id }}" class="text-3xl font-black text-slate-200 leading-none">0</div>
-                                    <div class="flex items-center gap-1.5 mt-2" id="status-container-{{ $category->id }}">
-                                        <i data-lucide="minus-circle" id="icon-{{ $category->id }}" class="w-4 h-4 text-slate-300"></i>
-                                        <span class="text-[9px] font-black text-slate-300 uppercase tracking-tighter" id="label-{{ $category->id }}">Draft</span>
-                                    </div>
+                                <div class="hidden sm:block text-right">
+                                    <div id="avg-{{ $category->id }}" class="text-5xl font-black text-slate-200">0</div>
+                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Skor Rata-rata</div>
                                 </div>
                             </div>
 
-                            {{-- Area Pertanyaan dengan SCROLL --}}
-                            <div class="p-8 space-y-12 max-h-[550px] overflow-y-auto custom-scroll">
-                                @forelse($category->questions as $question)
-                                <div class="space-y-6">
-                                    <div class="flex gap-4">
-                                        <div class="flex-shrink-0 w-6 h-6 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-[10px] font-bold">
-                                            {{ $loop->iteration }}
+                            {{-- Daftar Pertanyaan --}}
+                            <div class="space-y-12">
+                                @forelse($category->questions as $qIndex => $question)
+                                <div class="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-slate-100 hover:border-orange-200 transition-colors">
+                                    <div class="flex gap-4 mb-8">
+                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+                                            {{ $qIndex + 1 }}
                                         </div>
-                                        <p class="text-sm font-bold text-slate-700 leading-relaxed">{{ $question->question_text }}</p>
+                                        <h4 class="text-lg font-bold text-slate-700 leading-relaxed">{{ $question->question_text }}</h4>
                                     </div>
                                     
                                     {{-- Likert Scale Bulat --}}
-                                    <div class="likert-container px-2">
+                                    <div class="likert-container px-0 sm:px-8">
                                         {{-- Sangat Buruk --}}
                                         <label class="likert-item">
-                                            <input type="radio" name="scores[{{ $question->id }}]" value="20" class="hidden" 
-                                                   onclick="updateScore('{{ $category->id }}', 20)">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="20" class="hidden" onclick="updateScore('{{ $category->id }}')">
                                             <div class="likert-circle size-1 color-1"></div>
                                             <span class="likert-label">S. Buruk</span>
                                         </label>
 
                                         {{-- Buruk --}}
                                         <label class="likert-item">
-                                            <input type="radio" name="scores[{{ $question->id }}]" value="40" class="hidden"
-                                                   onclick="updateScore('{{ $category->id }}', 40)">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="40" class="hidden" onclick="updateScore('{{ $category->id }}')">
                                             <div class="likert-circle size-2 color-2"></div>
-                                            <span class="likert-label text-center">Buruk</span>
+                                            <span class="likert-label">Buruk</span>
                                         </label>
 
                                         {{-- Cukup --}}
                                         <label class="likert-item">
-                                            <input type="radio" name="scores[{{ $question->id }}]" value="60" class="hidden"
-                                                   onclick="updateScore('{{ $category->id }}', 60)">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="60" class="hidden" onclick="updateScore('{{ $category->id }}')">
                                             <div class="likert-circle size-3 color-3"></div>
                                             <span class="likert-label">Cukup</span>
                                         </label>
 
                                         {{-- Baik --}}
                                         <label class="likert-item">
-                                            <input type="radio" name="scores[{{ $question->id }}]" value="80" class="hidden"
-                                                   onclick="updateScore('{{ $category->id }}', 80)">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="80" class="hidden" onclick="updateScore('{{ $category->id }}')">
                                             <div class="likert-circle size-4 color-4"></div>
                                             <span class="likert-label">Baik</span>
                                         </label>
 
                                         {{-- Sangat Baik --}}
                                         <label class="likert-item">
-                                            <input type="radio" name="scores[{{ $question->id }}]" value="100" class="hidden"
-                                                   onclick="updateScore('{{ $category->id }}', 100)">
+                                            <input type="radio" name="scores[{{ $question->id }}]" value="100" class="hidden" onclick="updateScore('{{ $category->id }}')">
                                             <div class="likert-circle size-5 color-5"></div>
-                                            <span class="likert-label text-center">S. Baik</span>
+                                            <span class="likert-label">S. Baik</span>
                                         </label>
                                     </div>
-                                    <hr class="border-slate-50">
                                 </div>
                                 @empty
-                                <div class="text-center py-10">
-                                    <p class="text-slate-400 text-sm italic">Belum ada indikator untuk kategori ini.</p>
+                                <div class="text-center py-20">
+                                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i data-lucide="folder-open" class="text-slate-300 w-10 h-10"></i>
+                                    </div>
+                                    <p class="text-slate-500 font-bold text-lg">Belum Ada Indikator</p>
+                                    <p class="text-slate-400 text-sm">Kategori ini belum memiliki pertanyaan penilaian.</p>
                                 </div>
                                 @endforelse
                             </div>
+
                         </div>
                         @endforeach
+                        
+                        {{-- Halaman Finalisasi --}}
+                        <div id="page-final" class="category-page p-8 md:p-12 text-center">
+                            <div class="py-12">
+                                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                                    <i data-lucide="check-circle-2" class="text-green-500 w-12 h-12"></i>
+                                </div>
+                                <h2 class="text-4xl font-black text-slate-800 mb-4">Selesai Menilai?</h2>
+                                <p class="text-slate-500 font-medium text-lg mb-10 max-w-xl mx-auto">Pastikan Anda telah mengisi seluruh indikator pertanyaan. Tambahkan catatan opsional di bawah ini jika diperlukan, lalu klik simpan.</p>
+                                
+                                <div class="text-left mb-10">
+                                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-4 ml-4">Catatan Feedback Guru</label>
+                                    <textarea name="general_notes" class="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-8 focus:bg-white focus:border-orange-500 outline-none transition-all font-semibold text-slate-700 shadow-inner" rows="4" placeholder="Tuliskan perkembangan positif siswa atau masukan khusus..."></textarea>
+                                </div>
+
+                                <button type="submit" class="w-full bg-slate-900 hover:bg-orange-600 text-white font-black py-6 rounded-2xl shadow-xl hover:shadow-orange-500/40 transition-all duration-300 uppercase tracking-[0.2em] text-sm flex justify-center items-center gap-3">
+                                    <i data-lucide="save" class="w-5 h-5"></i> Simpan Penilaian Siswa
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    {{-- Navigasi Bawah --}}
+                    <div class="mt-6 flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                        <button type="button" id="btn-prev" class="px-6 py-4 md:px-8 md:py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-colors flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i> Sebelumnya
+                        </button>
+                        <button type="button" id="btn-next" class="px-6 py-4 md:px-8 md:py-4 rounded-2xl font-bold text-white bg-orange-500 hover:bg-orange-600 transition-all shadow-md flex items-center gap-2">
+                            Selanjutnya <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
                     </div>
 
-                    {{-- Form Footer --}}
-                    <div id="footer-section" class="pt-10 border-t border-slate-100 space-y-8" style="display: none;">
-                        <div class="space-y-4">
-                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Catatan Feedback Guru</label>
-                            <textarea name="general_notes" class="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] p-8 focus:bg-white focus:border-orange-500 outline-none transition-all font-semibold text-slate-700 shadow-inner" rows="4" placeholder="Tuliskan perkembangan positif siswa di sini..."></textarea>
-                        </div>
-                        
-                        <div class="flex flex-col md:flex-row gap-5">
-                            <button type="submit" class="flex-[3] bg-slate-900 hover:bg-orange-600 text-white font-black py-7 rounded-2xl shadow-xl hover:shadow-orange-500/40 transition-all duration-300 uppercase tracking-[0.2em] text-[11px] flex justify-center items-center gap-3">
-                                <i data-lucide="check-circle" class="w-5 h-5"></i> Finalisasi & Simpan Penilaian
-                            </button>
-                            <button type="button" onclick="window.location.reload()" class="flex-1 bg-white text-slate-400 border-2 border-slate-100 py-7 rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-colors">
-                                Reset
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
+
         </form>
     </div>
 </div>
 
 <script>
-    // Fungsi Hitung Skor Rata-rata Kategori
+    const categoryIds = [
+        @foreach($categories as $category) "{{ $category->id }}", @endforeach
+        "final"
+    ];
+    let currentIndex = 0;
+
+    function switchCategory(id, element) {
+        // Update Sidebar UI
+        document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
+        if(element) {
+            element.classList.add('active');
+        } else {
+            const tabIndex = categoryIds.indexOf(id);
+            const tabs = document.querySelectorAll('.cat-tab');
+            if(tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+        }
+
+        // Hide all pages
+        document.querySelectorAll('.category-page').forEach(page => page.classList.remove('active'));
+        
+        // Show target page
+        document.getElementById('page-' + id).classList.add('active');
+        
+        // Update index
+        currentIndex = categoryIds.indexOf(id);
+        updateNavButtons();
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+
+    function updateNavButtons() {
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        if (currentIndex === 0) {
+            btnPrev.disabled = true;
+            btnPrev.classList.add('opacity-50', 'cursor-not-allowed');
+            btnPrev.classList.remove('hover:bg-slate-100');
+        } else {
+            btnPrev.disabled = false;
+            btnPrev.classList.remove('opacity-50', 'cursor-not-allowed');
+            btnPrev.classList.add('hover:bg-slate-100');
+        }
+
+        if (currentIndex === categoryIds.length - 1) {
+            btnNext.style.display = 'none'; // Hide next button on final page
+        } else {
+            btnNext.style.display = 'flex';
+        }
+    }
+
+    document.getElementById('btn-prev').addEventListener('click', () => {
+        if (currentIndex > 0) {
+            switchCategory(categoryIds[currentIndex - 1]);
+        }
+    });
+
+    document.getElementById('btn-next').addEventListener('click', () => {
+        if (currentIndex < categoryIds.length - 1) {
+            switchCategory(categoryIds[currentIndex + 1]);
+        }
+    });
+
     function updateScore(catId) {
-        const card = document.getElementById(`card-${catId}`);
-        const checkedRadios = card.querySelectorAll('input[type="radio"]:checked');
+        const page = document.getElementById(`page-${catId}`);
+        const checkedRadios = page.querySelectorAll('input[type="radio"]:checked');
         
         if (checkedRadios.length > 0) {
             let total = 0;
@@ -299,58 +320,17 @@
 
             // Update Angka Rata-rata
             const avgDisplay = document.getElementById('avg-' + catId);
-            avgDisplay.innerText = average;
-            avgDisplay.className = "text-3xl font-black text-slate-900 leading-none";
-
-            // Update Icon dan Label berdasarkan Range Nilai
-            const icon = document.getElementById('icon-' + catId);
-            const label = document.getElementById('label-' + catId);
-            
-            let config = { icon: 'meh', color: '#f59e0b', label: 'CUKUP' };
-            if (average <= 25) config = { icon: 'frown', color: '#ef4444', label: 'BURUK' };
-            else if (average <= 50) config = { icon: 'meh', color: '#f59e0b', label: 'KURANG' };
-            else if (average <= 75) config = { icon: 'smile', color: '#f97316', label: 'BAIK' };
-            else if (average <= 90) config = { icon: 'laugh', color: '#10b981', label: 'HEBAT' };
-            else config = { icon: 'award', color: '#6366f1', label: 'TELADAN' };
-
-            icon.setAttribute('data-lucide', config.icon);
-            icon.style.color = config.color;
-            label.innerText = config.label;
-            label.style.color = config.color;
-            
-            lucide.createIcons();
+            if(avgDisplay) {
+                avgDisplay.innerText = average;
+                avgDisplay.className = "text-5xl font-black text-orange-500 transition-colors";
+            }
         }
     }
 
     $(document).ready(function() {
-        // Init Icons
         lucide.createIcons();
-
-        // Init Select2
-        $('.select2-search').select2({ placeholder: "Pilih Siswa" });
-        $('.select2-category').select2({ 
-            placeholder: "Pilih Kategori Penilaian",
-            closeOnSelect: false,
-            allowClear: true
-        });
-
-        // Toggle Tampilan Kategori
-        $('#categorySelector').on('change', function() {
-            const selected = $(this).val() || [];
-            $('.category-card').removeClass('active');
-            
-            if (selected.length > 0) {
-                $('#empty-state').fadeOut(200, function() {
-                    $('#footer-section').fadeIn();
-                    selected.forEach(id => {
-                        $(`#card-${id}`).addClass('active');
-                    });
-                });
-            } else {
-                $('#footer-section').fadeOut();
-                $('#empty-state').fadeIn();
-            }
-        });
+        $('.select2-search').select2({ placeholder: "Cari Nama Siswa..." });
+        updateNavButtons();
     });
 </script>
 @endsection

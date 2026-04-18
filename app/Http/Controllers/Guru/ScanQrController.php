@@ -54,6 +54,13 @@ class ScanQrController extends Controller
         $guru = Guru::where('qr_token', $request->qr_token)->firstOrFail();
 
         $now = Carbon::now('Asia/Jakarta');
+        if ($now->isWeekend()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Hari libur, tidak bisa absen hari ini.'
+            ], 403);
+        }
+
         $today = $now->toDateString();
         $jamSekarang = $now->format('H:i:s');
 

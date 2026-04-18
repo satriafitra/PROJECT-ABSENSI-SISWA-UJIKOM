@@ -32,10 +32,12 @@ class DashboardController extends Controller
 
         $izin = Attendance::whereDate('date', $today)
             ->where('status', 'izin')
+            ->where('is_verified', 'approved')
             ->count();
 
         $sakit = Attendance::whereDate('date', $today)
             ->where('status', 'sakit')
+            ->where('is_verified', 'approved')
             ->count();
 
         // Opsi: Jika Anda ingin mendeteksi status 'telat' juga
@@ -76,6 +78,10 @@ class DashboardController extends Controller
         // Menggunakan eager loading 'student.class' dan 'guru' agar performa ringan
         $attendances = Attendance::with(['student.class', 'guru'])
             ->whereDate('date', $date)
+            ->where(function ($query) {
+                $query->whereNotIn('is_verified', ['pending', 'rejected'])
+                      ->orWhereNull('is_verified');
+            })
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('student', function ($q) use ($search) {
                     $q->where('name', 'like', '%' . $search . '%');

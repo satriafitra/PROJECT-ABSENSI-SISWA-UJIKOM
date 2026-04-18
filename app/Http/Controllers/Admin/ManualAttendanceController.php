@@ -12,12 +12,19 @@ class ManualAttendanceController extends Controller
 {
     public function index()
     {
-        $manualAbsences = Attendance::with('student')
+        $pendingAbsences = Attendance::with('student')
             ->whereIn('status', ['sakit', 'izin'])
+            ->where('is_verified', 'pending')
             ->orderByDesc('date')
             ->get();
 
-        return view('admin.absensi-manual.index', compact('manualAbsences'));
+        $approvedAbsences = Attendance::with('student')
+            ->whereIn('status', ['sakit', 'izin'])
+            ->where('is_verified', 'approved')
+            ->orderByDesc('date')
+            ->get();
+
+        return view('admin.absensi-manual.index', compact('pendingAbsences', 'approvedAbsences'));
     }
 
     public function storeManual(Request $request)

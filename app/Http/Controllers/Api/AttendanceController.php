@@ -148,6 +148,7 @@ class AttendanceController extends Controller
             'status'     => $request->status,
             'keterangan' => $request->keterangan, // Pastikan kolom ini ada di database kamu
             'image'      => $imagePath,
+            'is_verified'=> 'pending',
         ]);
 
         return response()->json([

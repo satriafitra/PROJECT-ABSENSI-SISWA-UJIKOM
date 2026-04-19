@@ -179,4 +179,53 @@
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Delete Button
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const form = this.closest('form');
+                Swal.fire({
+                    title: 'Hapus data siswa?',
+                    text: "Tindakan ini tidak dapat dibatalkan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'Ya, Hapus',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true,
+                    borderRadius: '1.25rem'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Handle Session Flash Messages
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#f97316',
+                timer: 3000
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Ups!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#ef4444'
+            });
+        @endif
+    });
+</script>
 @endsection

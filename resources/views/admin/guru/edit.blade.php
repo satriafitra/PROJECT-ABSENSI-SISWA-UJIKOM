@@ -1,84 +1,131 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="p-6 max-w-3xl">
+<div class="px-4 py-6 md:px-8 md:py-8 bg-[#f8fafc] min-h-screen flex justify-center">
 
-    <h1 class="text-2xl font-bold text-orange-600 mb-6">
-        ✏️ Edit Data Guru
-    </h1>
+    <div class="w-full max-w-3xl">
+        {{-- Header Section --}}
+        <div class="mb-8 flex items-center gap-5">
+            <div class="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg shadow-blue-200/50 text-white flex-shrink-0">
+                <i data-lucide="edit" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-none mb-2">
+                    Edit Data Guru
+                </h1>
+                <p class="text-slate-500 text-sm font-medium tracking-wide">
+                    Perbarui informasi guru {{ $guru->nama }} di bawah ini.
+                </p>
+            </div>
+        </div>
 
-    @if ($errors->any())
-    <div class="mb-4 bg-red-100 text-red-700 p-3 rounded-xl">
-        {{ $errors->first() }}
+        {{-- Form Section --}}
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+            <div class="p-6 md:p-8">
+                <form action="{{ route('admin.guru.update', $guru->id) }}" method="POST" class="space-y-6">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- NAMA -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Nama Lengkap Guru</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="user" class="w-5 h-5"></i>
+                                </div>
+                                <input type="text" name="nama" value="{{ old('nama', $guru->nama) }}"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all outline-none"
+                                    required>
+                            </div>
+                            @error('nama')
+                                <p class="text-red-500 text-xs font-semibold mt-2 flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i>{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </div>
+                                <input type="email" name="email" value="{{ old('email', $guru->email) }}"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all outline-none"
+                                    required>
+                            </div>
+                            @error('email')
+                                <p class="text-red-500 text-xs font-semibold mt-2 flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i>{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- NIP -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">NIP / NUPTK</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                                </div>
+                                <input type="text" name="nip" value="{{ old('nip', $guru->nip) }}"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all outline-none">
+                            </div>
+                            @error('nip')
+                                <p class="text-red-500 text-xs font-semibold mt-2 flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i>{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- PASSWORD -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Password Baru <span class="text-xs text-slate-400 font-normal">(opsional)</span></label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="lock" class="w-5 h-5"></i>
+                                </div>
+                                <input type="password" name="password"
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all outline-none"
+                                    placeholder="Kosongkan jika tidak mengubah">
+                            </div>
+                            @error('password')
+                                <p class="text-red-500 text-xs font-semibold mt-2 flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i>{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- STATUS -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Status Keaktifan</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="activity" class="w-5 h-5"></i>
+                                </div>
+                                <select name="status"
+                                    class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all outline-none appearance-none cursor-pointer">
+                                    <option value="aktif" {{ $guru->status == 'aktif' ? 'selected' : '' }}>Aktif Mengajar</option>
+                                    <option value="nonaktif" {{ $guru->status == 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            @error('status')
+                                <p class="text-red-500 text-xs font-semibold mt-2 flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i>{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-6 mt-8 flex items-center justify-end gap-4">
+                        <a href="{{ route('admin.guru.index') }}"
+                            class="px-6 py-3 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                            Batal
+                        </a>
+                        <button type="submit"
+                            class="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-200/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+                            <i data-lucide="save" class="w-5 h-5"></i>
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    @endif
-
-    <div class="bg-white rounded-2xl shadow p-6">
-        <form action="{{ route('admin.guru.update', $guru->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-
-            <div class="mb-4">
-                <label class="block mb-1">Nama</label>
-                <input type="text" name="nama"
-                    value="{{ old('nama', $guru->nama) }}"
-                    class="w-full rounded-xl border-gray-300" required>
-            </div>
-
-            <div class="mb-4">
-                <label class="block mb-1">Email</label>
-                <input type="email" name="email"
-                    value="{{ old('email', $guru->email) }}"
-                    class="w-full rounded-xl border-gray-300">
-            </div>
-
-            <div class="mb-4">
-                <label class="block mb-1">NIP</label>
-                <input type="text" name="nip"
-                    value="{{ old('nip', $guru->nip) }}"
-                    class="w-full rounded-xl border-gray-300">
-            </div>
-
-            <div class="mb-6">
-                <label class="block mb-1">Status</label>
-                <select name="status"
-                    class="w-full rounded-xl border-gray-300">
-                    <option value="aktif" {{ $guru->status == 'aktif' ? 'selected' : '' }}>
-                        Aktif
-                    </option>
-                    <option value="nonaktif" {{ $guru->status == 'nonaktif' ? 'selected' : '' }}>
-                        Nonaktif
-                    </option>
-                </select>
-            </div>
-
-            <div class="flex justify-between">
-                <a href="{{ route('admin.guru.index') }}"
-                    class="px-4 py-2 rounded-xl border">
-                    Kembali
-                </a>
-
-                <div class="mb-4">
-                    <label class="block mb-1">
-                        Password Baru
-                        <span class="text-sm text-gray-500">(opsional)</span>
-                    </label>
-                    <input type="password" name="password"
-                        class="w-full rounded-xl border-gray-300"
-                        placeholder="Kosongkan jika tidak ingin mengubah">
-                    @error('password')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-
-                <button type="submit"
-                    class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </div>
-
 </div>
 @endsection

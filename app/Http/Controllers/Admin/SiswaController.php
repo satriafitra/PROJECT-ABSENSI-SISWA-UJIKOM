@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Classes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class SiswaController extends Controller
 {
@@ -59,11 +60,14 @@ class SiswaController extends Controller
             'class_id' => 'nullable|exists:classes,id',
         ]);
 
+        $nis = $request->nisn ?? $request->nis;
+
         Student::create([
-            'nis'      => $request->nisn ?? $request->nis,
+            'nis'      => $nis,
             'name'     => $request->name,
             'class_id' => $request->class_id,
             'qr_token' => Str::uuid(),
+            'password' => Hash::make($nis ?? 'password123'),
         ]);
 
         return redirect()->route('admin.siswa.index')

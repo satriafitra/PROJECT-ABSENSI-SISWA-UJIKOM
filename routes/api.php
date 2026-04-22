@@ -90,3 +90,13 @@ Route::get('/debug/guru-token', function () {
         'data' => Guru::select('id', 'nama', 'qr_token')->get()
     ]);
 });
+
+// =====================
+// API PUSAT ADUAN (TIKET)
+// =====================
+Route::get('/tickets', [\App\Http\Controllers\Api\TicketController::class, 'index']);
+Route::post('/tickets/check-duplicate', [\App\Http\Controllers\Api\TicketController::class, 'checkDuplicate']);
+Route::post('/tickets', [\App\Http\Controllers\Api\TicketController::class, 'store']);
+Route::get('/tickets/{id}', [\App\Http\Controllers\Api\TicketController::class, 'show']);
+Route::post('/tickets/{id}/reply', [\App\Http\Controllers\Api\TicketController::class, 'reply']);
+Route::post('/tickets/{id}/rate', [\App\Http\Controllers\Api\TicketController::class, 'rate']);

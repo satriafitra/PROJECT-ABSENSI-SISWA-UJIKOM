@@ -163,6 +163,13 @@
                 </a>
             </li>
 
+            <li>
+                <a href="{{ route('admin.tickets.index') }}"
+                    class="sidebar-item {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
+                    <i data-lucide="message-square" class="w-5 h-5"></i> <span>Pusat Aduan</span>
+                </a>
+            </li>
+
             @endif
 
             {{-- GURU MENU --}}

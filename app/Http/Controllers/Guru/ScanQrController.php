@@ -108,6 +108,7 @@ class ScanQrController extends Controller
             $jamMulai = Carbon::createFromFormat('H:i:s', $jadwal->jam_mulai, 'Asia/Jakarta');
             $batasTelat = $jamMulai->copy()->addMinutes($menitTelat)->format('H:i:s');
 
+            
             if ($jamSekarang > $jadwal->jam_selesai) {
                 Attendance::create([
                     'student_id' => $request->student_id,

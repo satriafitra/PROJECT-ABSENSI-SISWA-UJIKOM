@@ -41,4 +41,12 @@ class Student extends Model
         // Pastikan foreign key di tabel assessments adalah 'evaluatee_id'
         return $this->hasMany(Assessment::class, 'evaluatee_id');
     }
+
+    /**
+     * Relasi ke tabel tickets (Pusat Aduan)
+     */
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'reporter_id');
+    }
 }

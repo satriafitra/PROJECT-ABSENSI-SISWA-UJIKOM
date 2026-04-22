@@ -120,6 +120,14 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/{id}', [ShopManagerController::class, 'destroy'])->name('destroy');
             });
 
+            // Route Pusat Aduan (Ticketing System)
+            Route::prefix('tickets')->name('tickets.')->group(function() {
+                Route::get('/', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('index');
+                Route::get('/{id}', [\App\Http\Controllers\Admin\TicketController::class, 'show'])->name('show');
+                Route::post('/{id}/reply', [\App\Http\Controllers\Admin\TicketController::class, 'reply'])->name('reply');
+                Route::post('/{id}/status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('status');
+            });
+
         });
 
     /*

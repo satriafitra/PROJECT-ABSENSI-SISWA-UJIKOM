@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\TicketResponse;
+use App\Models\Student;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class TicketController extends Controller
 {
@@ -33,7 +36,77 @@ class TicketController extends Controller
         $totalInProgress = Ticket::where('status', 'In-Progress')->count();
         $totalClosed = Ticket::where('status', 'Closed')->count();
         
-        return view('admin.tickets.index', compact('tickets', 'totalOpen', 'totalInProgress', 'totalClosed', 'status'));
+        // KPI Average Response Time Per Operator (Sederhana)
+        // Mencari selisih waktu antara pembuatan tiket dengan balasan pertama operator
+        $responses = DB::table('ticket_responses')
+            ->join('tickets', 'ticket_responses.ticket_id', '=', 'tickets.id')
+            ->join('users', 'ticket_responses.sender_id', '=', 'users.id')
+            ->select(
+                'users.name as operator_name',
+                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, tickets.created_at, ticket_responses.created_at)) as avg_response_minutes')
+            )
+            ->where('ticket_responses.sender_type', 'user')
+            ->whereRaw('ticket_responses.id = (SELECT MIN(id) FROM ticket_responses tr WHERE tr.ticket_id = tickets.id AND tr.sender_type = "user")')
+            ->groupBy('users.id', 'users.name')
+            ->get();
+        // Rating Distribution
+        $ratingDistribution = DB::table('satisfaction_ratings')
+            ->select('score', DB::raw('count(*) as total'))
+            ->groupBy('score')
+            ->orderBy('score', 'desc')
+            ->pluck('total', 'score')
+            ->toArray();
+
+        // Siapkan array 5 sampai 1 untuk chart
+        $ratings = [];
+        $totalRatings = 0;
+        for ($i = 5; $i >= 1; $i--) {
+            $ratings[$i] = $ratingDistribution[$i] ?? 0;
+            $totalRatings += $ratings[$i];
+        }
+        
+        $averageRating = DB::table('satisfaction_ratings')->avg('score') ?? 0;
+
+        // Top Active Students
+        $topStudents = Student::withCount('tickets')
+            ->orderBy('tickets_count', 'desc')
+            ->having('tickets_count', '>', 0)
+            ->take(5)
+            ->get();
+        
+        return view('admin.tickets.index', compact('tickets', 'totalOpen', 'totalInProgress', 'totalClosed', 'status', 'responses', 'ratings', 'topStudents', 'averageRating', 'totalRatings'));
+    }
+
+    /**
+     * Show the form for creating a new ticket.
+     */
+    public function create()
+    {
+        $students = Student::orderBy('name')->get();
+        return view('admin.tickets.create', compact('students'));
+    }
+
+    /**
+     * Store a newly created ticket in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'reporter_id' => 'required|exists:students,id',
+            'subject' => 'required|string|max:255',
+            'priority' => 'required|in:Low,Mid,High',
+            'description' => 'required|string',
+        ]);
+
+        $ticket = Ticket::create([
+            'reporter_id' => $request->reporter_id,
+            'subject' => $request->subject,
+            'priority' => $request->priority,
+            'description' => $request->description,
+            'status' => 'Open',
+        ]);
+
+        return redirect()->route('admin.tickets.index')->with('success', 'Tiket berhasil dibuat untuk siswa tersebut.');
     }
 
     /**

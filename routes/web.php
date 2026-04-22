@@ -123,6 +123,8 @@ Route::middleware(['auth'])->group(function () {
             // Route Pusat Aduan (Ticketing System)
             Route::prefix('tickets')->name('tickets.')->group(function() {
                 Route::get('/', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Admin\TicketController::class, 'create'])->name('create');
+                Route::post('/store', [\App\Http\Controllers\Admin\TicketController::class, 'store'])->name('store');
                 Route::get('/{id}', [\App\Http\Controllers\Admin\TicketController::class, 'show'])->name('show');
                 Route::post('/{id}/reply', [\App\Http\Controllers\Admin\TicketController::class, 'reply'])->name('reply');
                 Route::post('/{id}/status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('status');

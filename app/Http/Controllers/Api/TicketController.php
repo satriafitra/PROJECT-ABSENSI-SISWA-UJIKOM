@@ -168,7 +168,7 @@ class TicketController extends Controller
             // 3. Catat di PointLedger
             PointLedger::create([
                 'student_id' => $student->id,
-                'transaction_type' => 'reward',
+                'transaction_type' => 'EARN',
                 'amount' => $pointsToAdd,
                 'current_balance' => $student->points,
                 'description' => "Bonus feedback tiket aduan #{$ticket->id}"
@@ -182,9 +182,10 @@ class TicketController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Rating Error: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan sistem'
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ], 500);
         }
     }
